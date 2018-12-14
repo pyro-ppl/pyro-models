@@ -189,6 +189,9 @@ def init_vector(name,  low=None, high=None, dims=None):
 def init_real(name, low=None, high=None, dims=(1), fix=None):
 #     if fix is not None:
 #         pass
+    if isinstance(dims, torch.Tensor):
+        # only in the case of calling vectorize_data or vectorize_params
+        dims = dims.item()
     if isinstance(dims, float) or isinstance(dims, int):
         dims = [to_int(dims)]
     if low is None:
