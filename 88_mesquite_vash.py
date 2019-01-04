@@ -1,8 +1,8 @@
 # model file: ../example-models/ARM/Ch.4/mesquite_vash.stan
 import torch
 import pyro
-from pyro_utils import (to_float, _pyro_sample, _call_func, check_constraints,
-init_real, init_vector, init_simplex, init_matrix, init_int, _index_select, to_int, _pyro_assign, as_bool)
+
+
 def validate_data_def(data):
     assert 'N' in data, 'variable not found in data: key=N'
     assert 'weight' in data, 'variable not found in data: key=weight'
@@ -19,13 +19,6 @@ def validate_data_def(data):
     canopy_height = data["canopy_height"]
     total_height = data["total_height"]
     group = data["group"]
-    check_constraints(N, low=0, dims=[1])
-    check_constraints(weight, dims=[N])
-    check_constraints(diam1, dims=[N])
-    check_constraints(diam2, dims=[N])
-    check_constraints(canopy_height, dims=[N])
-    check_constraints(total_height, dims=[N])
-    check_constraints(group, dims=[N])
 
 def transformed_data(data):
     # initialize data

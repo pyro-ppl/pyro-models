@@ -1,8 +1,8 @@
 # model file: ../example-models/ARM/Ch.14/election88.stan
 import torch
 import pyro
-from pyro_utils import (to_float, _pyro_sample, _call_func, check_constraints,
-init_real, init_vector, init_simplex, init_matrix, init_int, _index_select, to_int, _pyro_assign, as_bool)
+
+
 def validate_data_def(data):
     assert 'N' in data, 'variable not found in data: key=N'
     assert 'n_state' in data, 'variable not found in data: key=n_state'
@@ -17,12 +17,6 @@ def validate_data_def(data):
     female = data["female"]
     state = data["state"]
     y = data["y"]
-    check_constraints(N, low=0, dims=[1])
-    check_constraints(n_state, low=0, dims=[1])
-    check_constraints(black, low=0, high=1, dims=[N])
-    check_constraints(female, low=0, high=1, dims=[N])
-    check_constraints(state, low=1, high=n_state, dims=[N])
-    check_constraints(y, low=0, high=1, dims=[N])
 
 def init_params(data, params):
     # initialize data

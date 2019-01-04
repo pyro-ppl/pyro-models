@@ -1,8 +1,8 @@
 # model file: ../example-models/ARM/Ch.24/dogs.stan
 import torch
 import pyro
-from pyro_utils import (to_float, _pyro_sample, _call_func, check_constraints,
-init_real, init_vector, init_simplex, init_matrix, init_int, _index_select, to_int, _pyro_assign, as_bool)
+
+
 def validate_data_def(data):
     assert 'n_dogs' in data, 'variable not found in data: key=n_dogs'
     assert 'n_trials' in data, 'variable not found in data: key=n_trials'
@@ -11,9 +11,6 @@ def validate_data_def(data):
     n_dogs = data["n_dogs"]
     n_trials = data["n_trials"]
     y = data["y"]
-    check_constraints(n_dogs, low=0, dims=[1])
-    check_constraints(n_trials, low=0, dims=[1])
-    check_constraints(y, low=0, high=1, dims=[n_dogs, n_trials])
 
 def init_params(data, params):
     # initialize data

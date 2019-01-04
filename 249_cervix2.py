@@ -1,8 +1,8 @@
 # model file: ../example-models/bugs_examples/vol2/cervix/cervix2.stan
 import torch
 import pyro
-from pyro_utils import (to_float, _pyro_sample, _call_func, check_constraints,
-init_real, init_vector, init_simplex, init_matrix, init_int, _index_select, to_int, _pyro_assign, as_bool)
+
+
 def validate_data_def(data):
     assert 'Nc' in data, 'variable not found in data: key=Nc'
     assert 'Ni' in data, 'variable not found in data: key=Ni'
@@ -19,13 +19,6 @@ def validate_data_def(data):
     dc = data["dc"]
     wi = data["wi"]
     di = data["di"]
-    check_constraints(Nc, low=0, dims=[1])
-    check_constraints(Ni, low=0, dims=[1])
-    check_constraints(xc, dims=[Nc])
-    check_constraints(wc, dims=[Nc])
-    check_constraints(dc, dims=[Nc])
-    check_constraints(wi, dims=[Ni])
-    check_constraints(di, dims=[Ni])
 
 def init_params(data, params):
     # initialize data

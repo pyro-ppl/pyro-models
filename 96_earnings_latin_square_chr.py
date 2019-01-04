@@ -1,8 +1,8 @@
 # model file: ../example-models/ARM/Ch.13/earnings_latin_square_chr.stan
 import torch
 import pyro
-from pyro_utils import (to_float, _pyro_sample, _call_func, check_constraints,
-init_real, init_vector, init_simplex, init_matrix, init_int, _index_select, to_int, _pyro_assign, as_bool)
+
+
 def validate_data_def(data):
     assert 'N' in data, 'variable not found in data: key=N'
     assert 'n_age' in data, 'variable not found in data: key=n_age'
@@ -19,13 +19,6 @@ def validate_data_def(data):
     eth = data["eth"]
     x_centered = data["x_centered"]
     y = data["y"]
-    check_constraints(N, low=0, dims=[1])
-    check_constraints(n_age, low=0, dims=[1])
-    check_constraints(n_eth, low=0, dims=[1])
-    check_constraints(age, low=1, high=n_age, dims=[N])
-    check_constraints(eth, low=1, high=n_eth, dims=[N])
-    check_constraints(x_centered, dims=[N])
-    check_constraints(y, dims=[N])
 
 def init_params(data, params):
     # initialize data

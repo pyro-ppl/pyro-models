@@ -1,8 +1,8 @@
 # model file: ../example-models/ARM/Ch.13/pilots.stan
 import torch
 import pyro
-from pyro_utils import (to_float, _pyro_sample, _call_func, check_constraints,
-init_real, init_vector, init_simplex, init_matrix, init_int, _index_select, to_int, _pyro_assign, as_bool)
+
+
 def validate_data_def(data):
     assert 'N' in data, 'variable not found in data: key=N'
     assert 'n_groups' in data, 'variable not found in data: key=n_groups'
@@ -17,12 +17,6 @@ def validate_data_def(data):
     group_id = data["group_id"]
     scenario_id = data["scenario_id"]
     y = data["y"]
-    check_constraints(N, low=0, dims=[1])
-    check_constraints(n_groups, low=0, dims=[1])
-    check_constraints(n_scenarios, low=0, dims=[1])
-    check_constraints(group_id, low=1, high=n_groups, dims=[N])
-    check_constraints(scenario_id, low=1, high=n_scenarios, dims=[N])
-    check_constraints(y, dims=[N])
 
 def init_params(data, params):
     # initialize data

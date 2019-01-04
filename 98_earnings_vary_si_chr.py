@@ -1,8 +1,8 @@
 # model file: ../example-models/ARM/Ch.13/earnings_vary_si_chr.stan
 import torch
 import pyro
-from pyro_utils import (to_float, _pyro_sample, _call_func, check_constraints,
-init_real, init_vector, init_simplex, init_matrix, init_int, _index_select, to_int, _pyro_assign, as_bool)
+
+
 def validate_data_def(data):
     assert 'N' in data, 'variable not found in data: key=N'
     assert 'earn' in data, 'variable not found in data: key=earn'
@@ -13,10 +13,6 @@ def validate_data_def(data):
     earn = data["earn"]
     eth = data["eth"]
     height = data["height"]
-    check_constraints(N, low=0, dims=[1])
-    check_constraints(earn, dims=[N])
-    check_constraints(eth, dims=[N])
-    check_constraints(height, dims=[N])
 
 def transformed_data(data):
     # initialize data

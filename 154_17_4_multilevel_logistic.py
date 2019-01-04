@@ -1,8 +1,8 @@
 # model file: ../example-models/ARM/Ch.17/17.4_multilevel_logistic.stan
 import torch
 import pyro
-from pyro_utils import (to_float, _pyro_sample, _call_func, check_constraints,
-init_real, init_vector, init_simplex, init_matrix, init_int, _index_select, to_int, _pyro_assign, as_bool)
+
+
 def validate_data_def(data):
     assert 'N' in data, 'variable not found in data: key=N'
     assert 'n_age' in data, 'variable not found in data: key=n_age'
@@ -31,19 +31,6 @@ def validate_data_def(data):
     state = data["state"]
     y = data["y"]
     v_prev = data["v_prev"]
-    check_constraints(N, low=0, dims=[1])
-    check_constraints(n_age, low=0, dims=[1])
-    check_constraints(n_edu, low=0, dims=[1])
-    check_constraints(n_region, low=0, dims=[1])
-    check_constraints(n_state, low=0, dims=[1])
-    check_constraints(female, low=0, high=1, dims=[N])
-    check_constraints(black, low=0, high=1, dims=[N])
-    check_constraints(age, low=0, high=n_age, dims=[N])
-    check_constraints(edu, low=0, high=n_edu, dims=[N])
-    check_constraints(region, low=0, high=n_state, dims=[n_state])
-    check_constraints(state, low=0, high=n_state, dims=[N])
-    check_constraints(y, low=0, high=1, dims=[N])
-    check_constraints(v_prev, dims=[n_state])
 
 def init_params(data, params):
     # initialize data

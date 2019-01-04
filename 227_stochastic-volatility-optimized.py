@@ -1,16 +1,14 @@
 # model file: ../example-models/misc/moving-avg/stochastic-volatility-optimized.stan
 import torch
 import pyro
-from pyro_utils import (to_float, _pyro_sample, _call_func, check_constraints,
-init_real, init_vector, init_simplex, init_matrix, init_int, _index_select, to_int, _pyro_assign, as_bool)
+
+
 def validate_data_def(data):
     assert 'T' in data, 'variable not found in data: key=T'
     assert 'y' in data, 'variable not found in data: key=y'
     # initialize data
     T = data["T"]
     y = data["y"]
-    check_constraints(T, low=0, dims=[1])
-    check_constraints(y, dims=[T])
 
 def init_params(data, params):
     # initialize data

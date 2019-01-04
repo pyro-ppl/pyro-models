@@ -1,8 +1,8 @@
 # model file: ../example-models/ARM/Ch.10/sesame_multi_preds_3b.stan
 import torch
 import pyro
-from pyro_utils import (to_float, _pyro_sample, _call_func, check_constraints,
-init_real, init_vector, init_simplex, init_matrix, init_int, _index_select, to_int, _pyro_assign, as_bool)
+
+
 def validate_data_def(data):
     assert 'N' in data, 'variable not found in data: key=N'
     assert 'pretest' in data, 'variable not found in data: key=pretest'
@@ -17,12 +17,6 @@ def validate_data_def(data):
     site = data["site"]
     watched_hat = data["watched_hat"]
     y = data["y"]
-    check_constraints(N, low=0, dims=[1])
-    check_constraints(pretest, dims=[N])
-    check_constraints(setting, dims=[N])
-    check_constraints(site, dims=[N])
-    check_constraints(watched_hat, dims=[N])
-    check_constraints(y, dims=[N])
 
 def transformed_data(data):
     # initialize data

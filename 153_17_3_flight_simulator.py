@@ -1,8 +1,8 @@
 # model file: ../example-models/ARM/Ch.17/17.3_flight_simulator.stan
 import torch
 import pyro
-from pyro_utils import (to_float, _pyro_sample, _call_func, check_constraints,
-init_real, init_vector, init_simplex, init_matrix, init_int, _index_select, to_int, _pyro_assign, as_bool)
+
+
 def validate_data_def(data):
     assert 'N' in data, 'variable not found in data: key=N'
     assert 'n_treatment' in data, 'variable not found in data: key=n_treatment'
@@ -17,12 +17,6 @@ def validate_data_def(data):
     treatment = data["treatment"]
     airport = data["airport"]
     y = data["y"]
-    check_constraints(N, low=0, dims=[1])
-    check_constraints(n_treatment, low=0, dims=[1])
-    check_constraints(n_airport, low=0, dims=[1])
-    check_constraints(treatment, low=0, high=n_treatment, dims=[N])
-    check_constraints(airport, low=0, high=n_airport, dims=[N])
-    check_constraints(y, dims=[N])
 
 def init_params(data, params):
     # initialize data

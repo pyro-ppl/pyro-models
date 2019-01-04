@@ -1,8 +1,8 @@
 # model file: ../example-models/ARM/Ch.9/electric_inter.stan
 import torch
 import pyro
-from pyro_utils import (to_float, _pyro_sample, _call_func, check_constraints,
-init_real, init_vector, init_simplex, init_matrix, init_int, _index_select, to_int, _pyro_assign, as_bool)
+
+
 def validate_data_def(data):
     assert 'N' in data, 'variable not found in data: key=N'
     assert 'post_test' in data, 'variable not found in data: key=post_test'
@@ -13,10 +13,6 @@ def validate_data_def(data):
     post_test = data["post_test"]
     treatment = data["treatment"]
     pre_test = data["pre_test"]
-    check_constraints(N, low=0, dims=[1])
-    check_constraints(post_test, dims=[N])
-    check_constraints(treatment, dims=[N])
-    check_constraints(pre_test, dims=[N])
 
 def transformed_data(data):
     # initialize data

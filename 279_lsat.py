@@ -1,8 +1,8 @@
 # model file: ../example-models/bugs_examples/vol1/lsat/lsat.stan
 import torch
 import pyro
-from pyro_utils import (to_float, _pyro_sample, _call_func, check_constraints,
-init_real, init_vector, init_simplex, init_matrix, init_int, _index_select, to_int, _pyro_assign, as_bool)
+
+
 def validate_data_def(data):
     assert 'N' in data, 'variable not found in data: key=N'
     assert 'R' in data, 'variable not found in data: key=R'
@@ -15,11 +15,6 @@ def validate_data_def(data):
     T = data["T"]
     culm = data["culm"]
     response = data["response"]
-    check_constraints(N, low=0, dims=[1])
-    check_constraints(R, low=0, dims=[1])
-    check_constraints(T, low=0, dims=[1])
-    check_constraints(culm, low=0, dims=[R])
-    check_constraints(response, low=0, dims=[R, T])
 
 def transformed_data(data):
     # initialize data

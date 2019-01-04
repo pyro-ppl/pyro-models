@@ -1,8 +1,8 @@
 # model file: ../example-models/ARM/Ch.6/earnings1.stan
 import torch
 import pyro
-from pyro_utils import (to_float, _pyro_sample, _call_func, check_constraints,
-init_real, init_vector, init_simplex, init_matrix, init_int, _index_select, to_int, _pyro_assign, as_bool)
+
+
 def validate_data_def(data):
     assert 'N' in data, 'variable not found in data: key=N'
     assert 'earn_pos' in data, 'variable not found in data: key=earn_pos'
@@ -13,10 +13,6 @@ def validate_data_def(data):
     earn_pos = data["earn_pos"]
     height = data["height"]
     male = data["male"]
-    check_constraints(N, low=0, dims=[1])
-    check_constraints(earn_pos, low=0, high=1, dims=[N])
-    check_constraints(height, dims=[N])
-    check_constraints(male, dims=[N])
 
 def init_params(data, params):
     # initialize data

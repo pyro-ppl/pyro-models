@@ -1,8 +1,8 @@
 # model file: ../example-models/misc/eight_schools/eight_schools.stan
 import torch
 import pyro
-from pyro_utils import (to_float, _pyro_sample, _call_func, check_constraints,
-init_real, init_vector, init_simplex, init_matrix, init_int, _index_select, to_int, _pyro_assign, as_bool)
+
+
 def validate_data_def(data):
     assert 'J' in data, 'variable not found in data: key=J'
     assert 'y' in data, 'variable not found in data: key=y'
@@ -11,9 +11,6 @@ def validate_data_def(data):
     J = data["J"]
     y = data["y"]
     sigma = data["sigma"]
-    check_constraints(J, low=0, dims=[1])
-    check_constraints(y, dims=[J])
-    check_constraints(sigma, low=0, dims=[J])
 
 def init_params(data, params):
     # initialize data

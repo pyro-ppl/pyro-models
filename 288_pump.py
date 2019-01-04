@@ -1,8 +1,8 @@
 # model file: ../example-models/bugs_examples/vol1/pump/pump.stan
 import torch
 import pyro
-from pyro_utils import (to_float, _pyro_sample, _call_func, check_constraints,
-init_real, init_vector, init_simplex, init_matrix, init_int, _index_select, to_int, _pyro_assign, as_bool)
+
+
 def validate_data_def(data):
     assert 'N' in data, 'variable not found in data: key=N'
     assert 'x' in data, 'variable not found in data: key=x'
@@ -11,9 +11,6 @@ def validate_data_def(data):
     N = data["N"]
     x = data["x"]
     t = data["t"]
-    check_constraints(N, low=0, dims=[1])
-    check_constraints(x, low=0, dims=[N])
-    check_constraints(t, dims=[N])
 
 def init_params(data, params):
     # initialize data

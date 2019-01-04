@@ -1,8 +1,8 @@
 # model file: ../example-models/misc/irt/irt.stan
 import torch
 import pyro
-from pyro_utils import (to_float, _pyro_sample, _call_func, check_constraints,
-init_real, init_vector, init_simplex, init_matrix, init_int, _index_select, to_int, _pyro_assign, as_bool)
+
+
 def validate_data_def(data):
     assert 'J' in data, 'variable not found in data: key=J'
     assert 'K' in data, 'variable not found in data: key=K'
@@ -17,12 +17,6 @@ def validate_data_def(data):
     jj = data["jj"]
     kk = data["kk"]
     y = data["y"]
-    check_constraints(J, low=1, dims=[1])
-    check_constraints(K, low=1, dims=[1])
-    check_constraints(N, low=1, dims=[1])
-    check_constraints(jj, low=1, high=J, dims=[N])
-    check_constraints(kk, low=1, high=K, dims=[N])
-    check_constraints(y, low=0, high=1, dims=[N])
 
 def init_params(data, params):
     # initialize data

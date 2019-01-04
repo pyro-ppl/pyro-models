@@ -1,8 +1,8 @@
 # model file: ../example-models/ARM/Ch.5/wells_interaction.stan
 import torch
 import pyro
-from pyro_utils import (to_float, _pyro_sample, _call_func, check_constraints,
-init_real, init_vector, init_simplex, init_matrix, init_int, _index_select, to_int, _pyro_assign, as_bool)
+
+
 def validate_data_def(data):
     assert 'N' in data, 'variable not found in data: key=N'
     assert 'switched' in data, 'variable not found in data: key=switched'
@@ -13,10 +13,6 @@ def validate_data_def(data):
     switched = data["switched"]
     dist = data["dist"]
     arsenic = data["arsenic"]
-    check_constraints(N, low=0, dims=[1])
-    check_constraints(switched, low=0, high=1, dims=[N])
-    check_constraints(dist, dims=[N])
-    check_constraints(arsenic, dims=[N])
 
 def transformed_data(data):
     # initialize data
