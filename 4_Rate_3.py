@@ -33,17 +33,12 @@ def init_params(data):
 
 def model(data, params):
     # initialize data
+    data = {k: torch.tensor(v).float() for k, v in data.items()}
     n1 = data["n1"]
     n2 = data["n2"]
     k1 = data["k1"]
     k2 = data["k2"]
-    
     # init parameters
-    theta = params["theta"]
-    # initialize transformed parameters
-    # model block
-
-    theta =  _pyro_sample(theta, "theta", "beta", [1, 1])
-    k1 =  _pyro_sample(k1, "k1", "binomial", [n1, theta], obs=k1)
-    k2 =  _pyro_sample(k2, "k2", "binomial", [n2, theta], obs=k2)
-
+    theta =  pyro.sample("theta", dist.Beta(1., 1.))
+    pyro.sample("k1", dist.Binomial(n1, theta), obs=k1)
+    pyro.sample("k2", dist.Binomial(n2, theta), obs=k2)

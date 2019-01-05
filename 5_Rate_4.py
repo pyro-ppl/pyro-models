@@ -17,27 +17,15 @@ def validate_data_def(data):
 
 def init_params(data):
     params = {}
-    # initialize data
-    n = data["n"]
-    k = data["k"]
-    # assign init values for parameters
-    params["theta"] = pyro.sample("theta", dist.Uniform(0., 1))
-    params["thetaprior"] = pyro.sample("thetaprior", dist.Uniform(0., 1))
-
     return params
 
 def model(data, params):
     # initialize data
+    data = {k: torch.tensor(v).float() for k, v in data.items()}
     n = data["n"]
     k = data["k"]
-    
-    # init parameters
-    theta = params["theta"]
-    thetaprior = params["thetaprior"]
-    # initialize transformed parameters
     # model block
-
-    theta =  _pyro_sample(theta, "theta", "beta", [1, 1])
-    thetaprior =  _pyro_sample(thetaprior, "thetaprior", "beta", [1, 1])
-    k =  _pyro_sample(k, "k", "binomial", [n, theta], obs=k)
+    theta =  pyro.sample("theta", dist.Beta(1., 1.))
+    thetaprior =  pyro.sample("thetaprior", dist.Beta(1., 1.))
+    k =  pyro.sample("k", dist.Binomial(n, theta), obs=k)
 
