@@ -59,7 +59,8 @@ def transformed_data(data):
     data["i"] = i
     data["j"] = j
 
-def init_params(data, params):
+def init_params(data):
+    params = {}
     # initialize data
     N = data["N"]
     N_obs = data["N_obs"]
@@ -79,6 +80,8 @@ def init_params(data, params):
     params["a"] = pyro.sample("a"))
     params["b"] = pyro.sample("b"))
     params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
+
+    return params
 
 def model(data, params):
     # initialize data

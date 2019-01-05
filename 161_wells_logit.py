@@ -26,7 +26,8 @@ def transformed_data(data):
     dist100 = _pyro_assign(dist100., _call_func("divide", [dist,100.0]))
     data["dist100"] = dist100
 
-def init_params(data, params):
+def init_params(data):
+    params = {}
     # initialize data
     N = data["N"]
     dist = data["dist"]
@@ -35,6 +36,8 @@ def init_params(data, params):
     dist100 = data["dist100"]
     # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(2)) # vector
+
+    return params
 
 def model(data, params):
     # initialize data

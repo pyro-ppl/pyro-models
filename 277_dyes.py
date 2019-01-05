@@ -17,7 +17,8 @@ def validate_data_def(data):
     SAMPLES = data["SAMPLES"]
     y = data["y"]
 
-def init_params(data, params):
+def init_params(data):
+    params = {}
     # initialize data
     BATCHES = data["BATCHES"]
     SAMPLES = data["SAMPLES"]
@@ -27,6 +28,8 @@ def init_params(data, params):
     params["tau_within"] = pyro.sample("tau_within", dist.Uniform(0))
     params["theta"] = pyro.sample("theta"))
     params["mu"] = pyro.sample("mu", dims=(BATCHES)))
+
+    return params
 
 def model(data, params):
     # initialize data

@@ -17,13 +17,16 @@ def validate_data_def(data):
     y = data["y"]
     x = data["x"]
 
-def init_params(data, params):
+def init_params(data):
+    params = {}
     # initialize data
     N = data["N"]
     y = data["y"]
     x = data["x"]
     # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(2)) # vector
+
+    return params
 
 def model(data, params):
     # initialize data

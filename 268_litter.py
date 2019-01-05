@@ -19,7 +19,8 @@ def validate_data_def(data):
     r = data["r"]
     n = data["n"]
 
-def init_params(data, params):
+def init_params(data):
+    params = {}
     # initialize data
     G = data["G"]
     N = data["N"]
@@ -29,6 +30,8 @@ def init_params(data, params):
     params["p"] = init_matrix("p", dist.Uniform(0., 1, dims=(G, N)) # matrix
     params["mu"] = init_vector("mu", dist.Uniform(0., 1, dims=(G)) # vector
     params["a_plus_b"] = init_vector("a_plus_b", dist.Uniform(0.10000000000000001, dims=(G)) # vector
+
+    return params
 
 def model(data, params):
     # initialize data

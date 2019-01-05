@@ -56,7 +56,8 @@ def transformed_data(data):
     data["log_total_height"] = log_total_height
     data["log_density"] = log_density
 
-def init_params(data, params):
+def init_params(data):
+    params = {}
     # initialize data
     N = data["N"]
     weight = data["weight"]
@@ -76,6 +77,8 @@ def init_params(data, params):
     # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(7)) # vector
     params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
+
+    return params
 
 def model(data, params):
     # initialize data

@@ -41,7 +41,8 @@ def validate_data_def(data):
     v_prev = data["v_prev"]
     y = data["y"]
 
-def init_params(data, params):
+def init_params(data):
+    params = {}
     # initialize data
     N = data["N"]
     n_age = data["n_age"]
@@ -81,6 +82,8 @@ def init_params(data, params):
     params["xi_edu"] = pyro.sample("xi_edu", dist.Uniform(0))
     params["xi_age_edu"] = pyro.sample("xi_age_edu", dist.Uniform(0))
     params["xi_state"] = pyro.sample("xi_state", dist.Uniform(0))
+
+    return params
 
 def model(data, params):
     # initialize data

@@ -29,7 +29,8 @@ def transformed_data(data):
     log_earn = _pyro_assign(log_earn, _call_func("log", [earn]))
     data["log_earn"] = log_earn
 
-def init_params(data, params):
+def init_params(data):
+    params = {}
     # initialize data
     N = data["N"]
     earn = data["earn"]
@@ -40,6 +41,8 @@ def init_params(data, params):
     # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(3)) # vector
     params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
+
+    return params
 
 def model(data, params):
     # initialize data

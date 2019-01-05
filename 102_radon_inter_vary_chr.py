@@ -32,7 +32,8 @@ def transformed_data(data):
     inter = _pyro_assign(inter, _call_func("elt_multiply", [u,x]))
     data["inter"] = inter
 
-def init_params(data, params):
+def init_params(data):
+    params = {}
     # initialize data
     N = data["N"]
     county = data["county"]
@@ -50,6 +51,8 @@ def init_params(data, params):
     params["sigma_a1"] = pyro.sample("sigma_a1", dist.Uniform(0., 100.))
     params["sigma_a2"] = pyro.sample("sigma_a2", dist.Uniform(0., 100.))
     params["sigma_y"] = pyro.sample("sigma_y", dist.Uniform(0., 100.))
+
+    return params
 
 def model(data, params):
     # initialize data

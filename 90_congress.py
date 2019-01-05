@@ -19,7 +19,8 @@ def validate_data_def(data):
     vote_86 = data["vote_86"]
     vote_88 = data["vote_88"]
 
-def init_params(data, params):
+def init_params(data):
+    params = {}
     # initialize data
     N = data["N"]
     incumbency_88 = data["incumbency_88"]
@@ -28,6 +29,8 @@ def init_params(data, params):
     # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(3)) # vector
     params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
+
+    return params
 
 def model(data, params):
     # initialize data

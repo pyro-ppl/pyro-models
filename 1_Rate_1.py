@@ -15,12 +15,15 @@ def validate_data_def(data):
     n = data["n"]
     k = data["k"]
 
-def init_params(data, params):
+def init_params(data):
+    params = {}
     # initialize data
     n = data["n"]
     k = data["k"]
     # assign init values for parameters
     params["theta"] = pyro.sample("theta", dist.Uniform(0., 1))
+
+    return params
 
 def model(data, params):
     # initialize data

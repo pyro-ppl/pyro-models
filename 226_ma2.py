@@ -15,7 +15,8 @@ def validate_data_def(data):
     T = data["T"]
     y = data["y"]
 
-def init_params(data, params):
+def init_params(data):
+    params = {}
     # initialize data
     T = data["T"]
     y = data["y"]
@@ -23,6 +24,8 @@ def init_params(data, params):
     params["mu"] = pyro.sample("mu"))
     params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
     params["theta"] = init_vector("theta", dims=(2)) # vector
+
+    return params
 
 def model(data, params):
     # initialize data

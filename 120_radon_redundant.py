@@ -19,7 +19,8 @@ def validate_data_def(data):
     county = data["county"]
     y = data["y"]
 
-def init_params(data, params):
+def init_params(data):
+    params = {}
     # initialize data
     J = data["J"]
     N = data["N"]
@@ -30,6 +31,8 @@ def init_params(data, params):
     params["mu"] = pyro.sample("mu"))
     params["sigma_eta"] = pyro.sample("sigma_eta", dist.Uniform(0., 100.))
     params["sigma_y"] = pyro.sample("sigma_y", dist.Uniform(0., 100.))
+
+    return params
 
 def model(data, params):
     # initialize data

@@ -29,7 +29,8 @@ def transformed_data(data):
     inter = _pyro_assign(inter, _call_func("elt_multiply", [party,x]))
     data["inter"] = inter
 
-def init_params(data, params):
+def init_params(data):
+    params = {}
     # initialize data
     N = data["N"]
     party = data["party"]
@@ -40,6 +41,8 @@ def init_params(data, params):
     # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(4)) # vector
     params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
+
+    return params
 
 def model(data, params):
     # initialize data

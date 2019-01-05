@@ -50,7 +50,8 @@ def transformed_data(data):
     data["de_inter"] = de_inter
     data["ae_inter"] = ae_inter
 
-def init_params(data, params):
+def init_params(data):
+    params = {}
     # initialize data
     N = data["N"]
     switched = data["switched"]
@@ -67,6 +68,8 @@ def init_params(data, params):
     ae_inter = data["ae_inter"]
     # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(7)) # vector
+
+    return params
 
 def model(data, params):
     # initialize data

@@ -35,7 +35,8 @@ def transformed_data(data):
     data["log_weight"] = log_weight
     data["log_canopy_volume"] = log_canopy_volume
 
-def init_params(data, params):
+def init_params(data):
+    params = {}
     # initialize data
     N = data["N"]
     weight = data["weight"]
@@ -48,6 +49,8 @@ def init_params(data, params):
     # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(2)) # vector
     params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
+
+    return params
 
 def model(data, params):
     # initialize data

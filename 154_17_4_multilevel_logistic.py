@@ -37,7 +37,8 @@ def validate_data_def(data):
     y = data["y"]
     v_prev = data["v_prev"]
 
-def init_params(data, params):
+def init_params(data):
+    params = {}
     # initialize data
     N = data["N"]
     n_age = data["n_age"]
@@ -69,6 +70,8 @@ def init_params(data, params):
     params["b_region"] = init_vector("b_region", dims=(n_region)) # vector
     params["b_age_edu"] = init_matrix("b_age_edu", dims=(n_age, n_edu)) # matrix
     params["b_hat"] = init_vector("b_hat", dims=(n_state)) # vector
+
+    return params
 
 def model(data, params):
     # initialize data

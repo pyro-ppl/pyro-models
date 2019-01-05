@@ -35,7 +35,8 @@ def transformed_data(data):
     data["c_arsenic"] = c_arsenic
     data["inter"] = inter
 
-def init_params(data, params):
+def init_params(data):
+    params = {}
     # initialize data
     N = data["N"]
     switched = data["switched"]
@@ -47,6 +48,8 @@ def init_params(data, params):
     inter = data["inter"]
     # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(4)) # vector
+
+    return params
 
 def model(data, params):
     # initialize data

@@ -31,7 +31,8 @@ def validate_data_def(data):
     treatment = data["treatment"]
     y = data["y"]
 
-def init_params(data, params):
+def init_params(data):
+    params = {}
     # initialize data
     N = data["N"]
     n_grade = data["n_grade"]
@@ -50,6 +51,8 @@ def init_params(data, params):
     params["mu_a"] = init_vector("mu_a", dims=(n_grade_pair)) # vector
     params["sigma_a"] = init_vector("sigma_a", dist.Uniform(0., 100., dims=(n_grade_pair)) # vector
     params["sigma_y"] = init_vector("sigma_y", dist.Uniform(0., 100., dims=(n_grade)) # vector
+
+    return params
 
 def model(data, params):
     # initialize data

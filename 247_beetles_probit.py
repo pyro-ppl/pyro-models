@@ -32,7 +32,8 @@ def transformed_data(data):
     data["centered_x"] = centered_x
     data["mean_x"] = mean_x
 
-def init_params(data, params):
+def init_params(data):
+    params = {}
     # initialize data
     N = data["N"]
     n = data["n"]
@@ -44,6 +45,8 @@ def init_params(data, params):
     # assign init values for parameters
     params["alpha_star"] = pyro.sample("alpha_star"))
     params["beta"] = pyro.sample("beta"))
+
+    return params
 
 def model(data, params):
     # initialize data

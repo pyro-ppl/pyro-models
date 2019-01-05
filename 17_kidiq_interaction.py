@@ -29,7 +29,8 @@ def transformed_data(data):
     inter = _pyro_assign(inter, _call_func("elt_multiply", [mom_hs,mom_iq]))
     data["inter"] = inter
 
-def init_params(data, params):
+def init_params(data):
+    params = {}
     # initialize data
     N = data["N"]
     kid_score = data["kid_score"]
@@ -40,6 +41,8 @@ def init_params(data, params):
     # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(4)) # vector
     params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
+
+    return params
 
 def model(data, params):
     # initialize data

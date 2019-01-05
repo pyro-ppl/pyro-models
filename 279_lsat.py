@@ -47,7 +47,8 @@ def transformed_data(data):
     data["r"] = r
     data["ones"] = ones
 
-def init_params(data, params):
+def init_params(data):
+    params = {}
     # initialize data
     N = data["N"]
     R = data["R"]
@@ -61,6 +62,8 @@ def init_params(data, params):
     params["alpha"] = pyro.sample("alpha", dims=(T)))
     params["theta"] = init_vector("theta", dims=(N)) # vector
     params["beta"] = pyro.sample("beta", dist.Uniform(0))
+
+    return params
 
 def model(data, params):
     # initialize data

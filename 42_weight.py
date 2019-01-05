@@ -26,7 +26,8 @@ def transformed_data(data):
     c_height = _pyro_assign(c_height, _call_func("subtract", [height,_call_func("mean", [height])]))
     data["c_height"] = c_height
 
-def init_params(data, params):
+def init_params(data):
+    params = {}
     # initialize data
     N = data["N"]
     weight = data["weight"]
@@ -37,6 +38,8 @@ def init_params(data, params):
     params["a"] = pyro.sample("a"))
     params["b"] = pyro.sample("b"))
     params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
+
+    return params
 
 def model(data, params):
     # initialize data

@@ -17,7 +17,8 @@ def validate_data_def(data):
     post_test = data["post_test"]
     treatment = data["treatment"]
 
-def init_params(data, params):
+def init_params(data):
+    params = {}
     # initialize data
     N = data["N"]
     post_test = data["post_test"]
@@ -25,6 +26,8 @@ def init_params(data, params):
     # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(2)) # vector
     params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
+
+    return params
 
 def model(data, params):
     # initialize data

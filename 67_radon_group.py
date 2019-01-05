@@ -23,7 +23,8 @@ def validate_data_def(data):
     x = data["x"]
     y = data["y"]
 
-def init_params(data, params):
+def init_params(data):
+    params = {}
     # initialize data
     N = data["N"]
     J = data["J"]
@@ -39,6 +40,8 @@ def init_params(data, params):
     params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
     params["sigma_alpha"] = pyro.sample("sigma_alpha", dist.Uniform(0))
     params["sigma_beta"] = pyro.sample("sigma_beta", dist.Uniform(0))
+
+    return params
 
 def model(data, params):
     # initialize data

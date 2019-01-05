@@ -35,7 +35,8 @@ def transformed_data(data):
     data["z_mom_iq"] = z_mom_iq
     data["inter"] = inter
 
-def init_params(data, params):
+def init_params(data):
+    params = {}
     # initialize data
     N = data["N"]
     kid_score = data["kid_score"]
@@ -48,6 +49,8 @@ def init_params(data, params):
     # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(4)) # vector
     params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
+
+    return params
 
 def model(data, params):
     # initialize data

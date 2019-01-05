@@ -25,7 +25,8 @@ def validate_data_def(data):
     wi = data["wi"]
     di = data["di"]
 
-def init_params(data, params):
+def init_params(data):
+    params = {}
     # initialize data
     Nc = data["Nc"]
     Ni = data["Ni"]
@@ -39,6 +40,8 @@ def init_params(data, params):
     params["q"] = pyro.sample("q", dist.Uniform(0., 1))
     params["beta0C"] = pyro.sample("beta0C"))
     params["beta"] = pyro.sample("beta"))
+
+    return params
 
 def model(data, params):
     # initialize data
