@@ -19,14 +19,8 @@ def validate_data_def(data):
 
 def init_params(data):
     params = {}
-    # initialize data
-    N = data["N"]
-    final = data["final"]
-    midterm = data["midterm"]
-    # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(2)) # vector
-    params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
-
+    params["sigma"] = pyro.sample("sigma", dist.Uniform(0., 1000.))
     return params
 
 def model(data, params):
@@ -34,12 +28,9 @@ def model(data, params):
     N = data["N"]
     final = data["final"]
     midterm = data["midterm"]
-    
+
     # init parameters
     beta = params["beta"]
     sigma = params["sigma"]
-    # initialize transformed parameters
-    # model block
-
-    final =  _pyro_sample(final, "final", "normal", [_call_func("add", [_index_select(beta, 1 - 1) ,_call_func("multiply", [_index_select(beta, 2 - 1) ,midterm])]), sigma], obs=final)
+    pyro.sample('obs', dist.Normal(beta[0] + beta[1] * midterm, sigma), obs=final)
 
