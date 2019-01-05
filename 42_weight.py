@@ -1,6 +1,11 @@
 # model file: ../example-models/ARM/Ch.18/weight.stan
 import torch
 import pyro
+import pyro.distributions as dist
+
+def init_vector(name, dims=None):
+    return pyro.sample(name, dist.Normal(torch.zeros(dims), 0.2 * torch.ones(dims)))
+
 
 
 def validate_data_def(data):
@@ -29,9 +34,9 @@ def init_params(data, params):
     # initialize transformed data
     c_height = data["c_height"]
     # assign init values for parameters
-    params["a"] = init_real("a") # real/double
-    params["b"] = init_real("b") # real/double
-    params["sigma"] = init_real("sigma", low=0) # real/double
+    params["a"] = pyro.sample("a"))
+    params["b"] = pyro.sample("b"))
+    params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
 
 def model(data, params):
     # initialize data
@@ -40,7 +45,8 @@ def model(data, params):
     height = data["height"]
     # initialize transformed data
     c_height = data["c_height"]
-    # INIT parameters
+    
+    # init parameters
     a = params["a"]
     b = params["b"]
     sigma = params["sigma"]

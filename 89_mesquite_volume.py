@@ -1,6 +1,11 @@
 # model file: ../example-models/ARM/Ch.4/mesquite_volume.stan
 import torch
 import pyro
+import pyro.distributions as dist
+
+def init_vector(name, dims=None):
+    return pyro.sample(name, dist.Normal(torch.zeros(dims), 0.2 * torch.ones(dims)))
+
 
 
 def validate_data_def(data):
@@ -42,7 +47,7 @@ def init_params(data, params):
     log_canopy_volume = data["log_canopy_volume"]
     # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(2)) # vector
-    params["sigma"] = init_real("sigma", low=0) # real/double
+    params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
 
 def model(data, params):
     # initialize data
@@ -54,7 +59,8 @@ def model(data, params):
     # initialize transformed data
     log_weight = data["log_weight"]
     log_canopy_volume = data["log_canopy_volume"]
-    # INIT parameters
+    
+    # init parameters
     beta = params["beta"]
     sigma = params["sigma"]
     # initialize transformed parameters

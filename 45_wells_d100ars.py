@@ -1,6 +1,11 @@
 # model file: ../example-models/ARM/Ch.5/wells_d100ars.stan
 import torch
 import pyro
+import pyro.distributions as dist
+
+def init_vector(name, dims=None):
+    return pyro.sample(name, dist.Normal(torch.zeros(dims), 0.2 * torch.ones(dims)))
+
 
 
 def validate_data_def(data):
@@ -21,7 +26,7 @@ def transformed_data(data):
     dist = data["dist"]
     arsenic = data["arsenic"]
     dist100 = init_vector("dist100", dims=(N)) # vector
-    dist100 = _pyro_assign(dist100, _call_func("divide", [dist,100.0]))
+    dist100 = _pyro_assign(dist100., _call_func("divide", [dist,100.0]))
     data["dist100"] = dist100
 
 def init_params(data, params):
@@ -43,7 +48,8 @@ def model(data, params):
     arsenic = data["arsenic"]
     # initialize transformed data
     dist100 = data["dist100"]
-    # INIT parameters
+    
+    # init parameters
     beta = params["beta"]
     # initialize transformed parameters
     # model block

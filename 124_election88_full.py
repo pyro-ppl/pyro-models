@@ -1,6 +1,11 @@
 # model file: ../example-models/ARM/Ch.14/election88_full.stan
 import torch
 import pyro
+import pyro.distributions as dist
+
+def init_vector(name, dims=None):
+    return pyro.sample(name, dist.Normal(torch.zeros(dims), 0.2 * torch.ones(dims)))
+
 
 
 def validate_data_def(data):
@@ -60,11 +65,11 @@ def init_params(data, params):
     params["d"] = init_vector("d", dims=(n_state)) # vector
     params["e"] = init_vector("e", dims=(n_region_full)) # vector
     params["beta"] = init_vector("beta", dims=(5)) # vector
-    params["sigma_a"] = init_real("sigma_a", low=0, high=100) # real/double
-    params["sigma_b"] = init_real("sigma_b", low=0, high=100) # real/double
-    params["sigma_c"] = init_real("sigma_c", low=0, high=100) # real/double
-    params["sigma_d"] = init_real("sigma_d", low=0, high=100) # real/double
-    params["sigma_e"] = init_real("sigma_e", low=0, high=100) # real/double
+    params["sigma_a"] = pyro.sample("sigma_a", dist.Uniform(0., 100.))
+    params["sigma_b"] = pyro.sample("sigma_b", dist.Uniform(0., 100.))
+    params["sigma_c"] = pyro.sample("sigma_c", dist.Uniform(0., 100.))
+    params["sigma_d"] = pyro.sample("sigma_d", dist.Uniform(0., 100.))
+    params["sigma_e"] = pyro.sample("sigma_e", dist.Uniform(0., 100.))
 
 def model(data, params):
     # initialize data
@@ -83,7 +88,8 @@ def model(data, params):
     state = data["state"]
     v_prev_full = data["v_prev_full"]
     y = data["y"]
-    # INIT parameters
+    
+    # init parameters
     a = params["a"]
     b = params["b"]
     c = params["c"]
@@ -101,11 +107,11 @@ def model(data, params):
         y_hat[i - 1] = _pyro_assign(y_hat[i - 1], (((((((((_index_select(beta, 1 - 1)  + (_index_select(beta, 2 - 1)  * _index_select(black, i - 1) )) + (_index_select(beta, 3 - 1)  * _index_select(female, i - 1) )) + ((_index_select(beta, 5 - 1)  * _index_select(female, i - 1) ) * _index_select(black, i - 1) )) + (_index_select(beta, 4 - 1)  * _index_select(v_prev_full, i - 1) )) + _index_select(a, age[i - 1] - 1) ) + _index_select(b, edu[i - 1] - 1) ) + _index_select(c, age_edu[i - 1] - 1) ) + _index_select(d, state[i - 1] - 1) ) + _index_select(e, region_full[i - 1] - 1) ))
     # model block
 
-    a =  _pyro_sample(a, "a", "normal", [0, sigma_a])
-    b =  _pyro_sample(b, "b", "normal", [0, sigma_b])
-    c =  _pyro_sample(c, "c", "normal", [0, sigma_c])
-    d =  _pyro_sample(d, "d", "normal", [0, sigma_d])
-    e =  _pyro_sample(e, "e", "normal", [0, sigma_e])
-    beta =  _pyro_sample(beta, "beta", "normal", [0, 100])
+    a =  _pyro_sample(a, "a", "normal", [0., sigma_a])
+    b =  _pyro_sample(b, "b", "normal", [0., sigma_b])
+    c =  _pyro_sample(c, "c", "normal", [0., sigma_c])
+    d =  _pyro_sample(d, "d", "normal", [0., sigma_d])
+    e =  _pyro_sample(e, "e", "normal", [0., sigma_e])
+    beta =  _pyro_sample(beta, "beta", "normal", [0., 100])
     y =  _pyro_sample(y, "y", "bernoulli_logit", [y_hat], obs=y)
 

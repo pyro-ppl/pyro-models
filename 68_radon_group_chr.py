@@ -1,6 +1,11 @@
 # model file: ../example-models/ARM/Ch.12/radon_group_chr.stan
 import torch
 import pyro
+import pyro.distributions as dist
+
+def init_vector(name, dims=None):
+    return pyro.sample(name, dist.Normal(torch.zeros(dims), 0.2 * torch.ones(dims)))
+
 
 
 def validate_data_def(data):
@@ -29,9 +34,9 @@ def init_params(data, params):
     # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(2)) # vector
     params["eta"] = init_vector("eta", dims=(J)) # vector
-    params["mu_b"] = init_real("mu_b") # real/double
-    params["sigma"] = init_real("sigma", low=0) # real/double
-    params["sigma_b"] = init_real("sigma_b", low=0) # real/double
+    params["mu_b"] = pyro.sample("mu_b"))
+    params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
+    params["sigma_b"] = pyro.sample("sigma_b", dist.Uniform(0))
 
 def model(data, params):
     # initialize data
@@ -41,7 +46,8 @@ def model(data, params):
     u = data["u"]
     x = data["x"]
     y = data["y"]
-    # INIT parameters
+    
+    # init parameters
     beta = params["beta"]
     eta = params["eta"]
     mu_b = params["mu_b"]
@@ -55,10 +61,10 @@ def model(data, params):
         y_hat[i - 1] = _pyro_assign(y_hat[i - 1], ((_index_select(b, county[i - 1] - 1)  + (_index_select(x, i - 1)  * _index_select(beta, 1 - 1) )) + (_index_select(u, i - 1)  * _index_select(beta, 2 - 1) )))
     # model block
 
-    mu_b =  _pyro_sample(mu_b, "mu_b", "normal", [0, 1])
-    eta =  _pyro_sample(eta, "eta", "normal", [0, 1])
-    beta =  _pyro_sample(beta, "beta", "normal", [0, 100])
-    sigma =  _pyro_sample(sigma, "sigma", "cauchy", [0, 2.5])
-    sigma_b =  _pyro_sample(sigma_b, "sigma_b", "cauchy", [0, 2.5])
+    mu_b =  _pyro_sample(mu_b, "mu_b", "normal", [0., 1])
+    eta =  _pyro_sample(eta, "eta", "normal", [0., 1])
+    beta =  _pyro_sample(beta, "beta", "normal", [0., 100])
+    sigma =  _pyro_sample(sigma, "sigma", "cauchy", [0., 2.5])
+    sigma_b =  _pyro_sample(sigma_b, "sigma_b", "cauchy", [0., 2.5])
     y =  _pyro_sample(y, "y", "normal", [y_hat, sigma], obs=y)
 

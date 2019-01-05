@@ -1,6 +1,11 @@
 # model file: ../example-models/ARM/Ch.5/wells_predicted.stan
 import torch
 import pyro
+import pyro.distributions as dist
+
+def init_vector(name, dims=None):
+    return pyro.sample(name, dist.Normal(torch.zeros(dims), 0.2 * torch.ones(dims)))
+
 
 
 def validate_data_def(data):
@@ -29,11 +34,11 @@ def transformed_data(data):
     da_inter = init_vector("da_inter", dims=(N)) # vector
     de_inter = init_vector("de_inter", dims=(N)) # vector
     ae_inter = init_vector("ae_inter", dims=(N)) # vector
-    c_dist100 = _pyro_assign(c_dist100, _call_func("divide", [_call_func("subtract", [dist,_call_func("mean", [dist])]),100.0]))
+    c_dist100 = _pyro_assign(c_dist100., _call_func("divide", [_call_func("subtract", [dist,_call_func("mean", [dist])]),100.0]))
     c_arsenic = _pyro_assign(c_arsenic, _call_func("subtract", [_call_func("log", [arsenic]),_call_func("mean", [_call_func("log", [arsenic])])]))
     c_educ4 = _pyro_assign(c_educ4, _call_func("divide", [_call_func("subtract", [educ,_call_func("mean", [educ])]),4.0]))
-    da_inter = _pyro_assign(da_inter, _call_func("elt_multiply", [c_dist100,c_arsenic]))
-    de_inter = _pyro_assign(de_inter, _call_func("elt_multiply", [c_dist100,c_educ4]))
+    da_inter = _pyro_assign(da_inter, _call_func("elt_multiply", [c_dist100.,c_arsenic]))
+    de_inter = _pyro_assign(de_inter, _call_func("elt_multiply", [c_dist100.,c_educ4]))
     ae_inter = _pyro_assign(ae_inter, _call_func("elt_multiply", [c_arsenic,c_educ4]))
     data["c_dist100"] = c_dist100
     data["c_arsenic"] = c_arsenic
@@ -73,7 +78,8 @@ def model(data, params):
     da_inter = data["da_inter"]
     de_inter = data["de_inter"]
     ae_inter = data["ae_inter"]
-    # INIT parameters
+    
+    # init parameters
     beta = params["beta"]
     # initialize transformed parameters
     # model block

@@ -1,6 +1,11 @@
 # model file: ../example-models/misc/moving-avg/ma2.stan
 import torch
 import pyro
+import pyro.distributions as dist
+
+def init_vector(name, dims=None):
+    return pyro.sample(name, dist.Normal(torch.zeros(dims), 0.2 * torch.ones(dims)))
+
 
 
 def validate_data_def(data):
@@ -15,15 +20,16 @@ def init_params(data, params):
     T = data["T"]
     y = data["y"]
     # assign init values for parameters
-    params["mu"] = init_real("mu") # real/double
-    params["sigma"] = init_real("sigma", low=0) # real/double
+    params["mu"] = pyro.sample("mu"))
+    params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
     params["theta"] = init_vector("theta", dims=(2)) # vector
 
 def model(data, params):
     # initialize data
     T = data["T"]
     y = data["y"]
-    # INIT parameters
+    
+    # init parameters
     mu = params["mu"]
     sigma = params["sigma"]
     theta = params["theta"]
@@ -35,9 +41,9 @@ def model(data, params):
         epsilon[t - 1] = _pyro_assign(epsilon[t - 1], (((_index_select(y, t - 1)  - mu) - (_index_select(theta, 1 - 1)  * _index_select(epsilon, (t - 1) - 1) )) - (_index_select(theta, 2 - 1)  * _index_select(epsilon, (t - 2) - 1) )))
     # model block
 
-    mu =  _pyro_sample(mu, "mu", "cauchy", [0, 2.5])
-    theta =  _pyro_sample(theta, "theta", "cauchy", [0, 2.5])
-    sigma =  _pyro_sample(sigma, "sigma", "cauchy", [0, 2.5])
+    mu =  _pyro_sample(mu, "mu", "cauchy", [0., 2.5])
+    theta =  _pyro_sample(theta, "theta", "cauchy", [0., 2.5])
+    sigma =  _pyro_sample(sigma, "sigma", "cauchy", [0., 2.5])
     for t in range(3, to_int(T) + 1):
         y[t - 1] =  _pyro_sample(_index_select(y, t - 1) , "y[%d]" % (to_int(t-1)), "normal", [((mu + (_index_select(theta, 1 - 1)  * _index_select(epsilon, (t - 1) - 1) )) + (_index_select(theta, 2 - 1)  * _index_select(epsilon, (t - 2) - 1) )), sigma], obs=_index_select(y, t - 1) )
 

@@ -1,6 +1,11 @@
 # model file: ../example-models/ARM/Ch.4/logearn_interaction.stan
 import torch
 import pyro
+import pyro.distributions as dist
+
+def init_vector(name, dims=None):
+    return pyro.sample(name, dist.Normal(torch.zeros(dims), 0.2 * torch.ones(dims)))
+
 
 
 def validate_data_def(data):
@@ -38,7 +43,7 @@ def init_params(data, params):
     inter = data["inter"]
     # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(4)) # vector
-    params["sigma"] = init_real("sigma", low=0) # real/double
+    params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
 
 def model(data, params):
     # initialize data
@@ -49,7 +54,8 @@ def model(data, params):
     # initialize transformed data
     log_earn = data["log_earn"]
     inter = data["inter"]
-    # INIT parameters
+    
+    # init parameters
     beta = params["beta"]
     sigma = params["sigma"]
     # initialize transformed parameters

@@ -1,6 +1,11 @@
 # model file: ../example-models/ARM/Ch.24/dogs.stan
 import torch
 import pyro
+import pyro.distributions as dist
+
+def init_vector(name, dims=None):
+    return pyro.sample(name, dist.Normal(torch.zeros(dims), 0.2 * torch.ones(dims)))
+
 
 
 def validate_data_def(data):
@@ -25,7 +30,8 @@ def model(data, params):
     n_dogs = data["n_dogs"]
     n_trials = data["n_trials"]
     y = data["y"]
-    # INIT parameters
+    
+    # init parameters
     beta = params["beta"]
     # initialize transformed parameters
     n_avoid = init_matrix("n_avoid", dims=(n_dogs, n_trials)) # matrix
@@ -43,7 +49,7 @@ def model(data, params):
             p[j - 1][t - 1] = _pyro_assign(p[j - 1][t - 1], ((_index_select(beta, 1 - 1)  + (_index_select(beta, 2 - 1)  * _index_select(_index_select(n_avoid, j - 1) , t - 1) )) + (_index_select(beta, 3 - 1)  * _index_select(_index_select(n_shock, j - 1) , t - 1) )))
     # model block
 
-    beta =  _pyro_sample(beta, "beta", "normal", [0, 100])
+    beta =  _pyro_sample(beta, "beta", "normal", [0., 100])
     for i in range(1, to_int(n_dogs) + 1):
 
         for j in range(1, to_int(n_trials) + 1):

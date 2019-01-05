@@ -1,6 +1,11 @@
 # model file: ../example-models/ARM/Ch.13/earnings_vary_si.stan
 import torch
 import pyro
+import pyro.distributions as dist
+
+def init_vector(name, dims=None):
+    return pyro.sample(name, dist.Normal(torch.zeros(dims), 0.2 * torch.ones(dims)))
+
 
 
 def validate_data_def(data):
@@ -35,11 +40,11 @@ def init_params(data, params):
     # assign init values for parameters
     params["a1"] = init_vector("a1", dims=(4)) # vector
     params["a2"] = init_vector("a2", dims=(4)) # vector
-    params["sigma_a1"] = init_real("sigma_a1", low=0) # real/double
-    params["sigma_a2"] = init_real("sigma_a2", low=0) # real/double
-    params["sigma_y"] = init_real("sigma_y", low=0) # real/double
-    params["mu_a1"] = init_real("mu_a1") # real/double
-    params["mu_a2"] = init_real("mu_a2") # real/double
+    params["sigma_a1"] = pyro.sample("sigma_a1", dist.Uniform(0))
+    params["sigma_a2"] = pyro.sample("sigma_a2", dist.Uniform(0))
+    params["sigma_y"] = pyro.sample("sigma_y", dist.Uniform(0))
+    params["mu_a1"] = pyro.sample("mu_a1"))
+    params["mu_a2"] = pyro.sample("mu_a2"))
 
 def model(data, params):
     # initialize data
@@ -49,7 +54,8 @@ def model(data, params):
     height = data["height"]
     # initialize transformed data
     log_earn = data["log_earn"]
-    # INIT parameters
+    
+    # init parameters
     a1 = params["a1"]
     a2 = params["a2"]
     sigma_a1 = params["sigma_a1"]
@@ -63,12 +69,12 @@ def model(data, params):
         y_hat[i - 1] = _pyro_assign(y_hat[i - 1], (_index_select(a1, eth[i - 1] - 1)  + (_index_select(a2, eth[i - 1] - 1)  * _index_select(height, i - 1) )))
     # model block
 
-    mu_a1 =  _pyro_sample(mu_a1, "mu_a1", "normal", [0, 1])
-    mu_a2 =  _pyro_sample(mu_a2, "mu_a2", "normal", [0, 1])
+    mu_a1 =  _pyro_sample(mu_a1, "mu_a1", "normal", [0., 1])
+    mu_a2 =  _pyro_sample(mu_a2, "mu_a2", "normal", [0., 1])
     a1 =  _pyro_sample(a1, "a1", "normal", [(10 * mu_a1), sigma_a1])
     a2 =  _pyro_sample(a2, "a2", "normal", [(0.01 * mu_a2), sigma_a2])
-    sigma_a1 =  _pyro_sample(sigma_a1, "sigma_a1", "cauchy", [0, 5])
-    sigma_a2 =  _pyro_sample(sigma_a2, "sigma_a2", "cauchy", [0, 5])
-    sigma_y =  _pyro_sample(sigma_y, "sigma_y", "cauchy", [0, 5])
+    sigma_a1 =  _pyro_sample(sigma_a1, "sigma_a1", "cauchy", [0., 5])
+    sigma_a2 =  _pyro_sample(sigma_a2, "sigma_a2", "cauchy", [0., 5])
+    sigma_y =  _pyro_sample(sigma_y, "sigma_y", "cauchy", [0., 5])
     log_earn =  _pyro_sample(log_earn, "log_earn", "normal", [y_hat, sigma_y], obs=log_earn)
 

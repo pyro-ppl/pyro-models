@@ -1,6 +1,11 @@
 # model file: ../example-models/misc/eight_schools/eight_schools.stan
 import torch
 import pyro
+import pyro.distributions as dist
+
+def init_vector(name, dims=None):
+    return pyro.sample(name, dist.Normal(torch.zeros(dims), 0.2 * torch.ones(dims)))
+
 
 
 def validate_data_def(data):
@@ -18,16 +23,17 @@ def init_params(data, params):
     y = data["y"]
     sigma = data["sigma"]
     # assign init values for parameters
-    params["mu"] = init_real("mu") # real/double
-    params["theta"] = init_real("theta", dims=(J)) # real/double
-    params["tau"] = init_real("tau", low=0) # real/double
+    params["mu"] = pyro.sample("mu"))
+    params["theta"] = pyro.sample("theta", dims=(J)))
+    params["tau"] = pyro.sample("tau", dist.Uniform(0))
 
 def model(data, params):
     # initialize data
     J = data["J"]
     y = data["y"]
     sigma = data["sigma"]
-    # INIT parameters
+    
+    # init parameters
     mu = params["mu"]
     theta = params["theta"]
     tau = params["tau"]

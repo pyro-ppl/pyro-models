@@ -1,6 +1,11 @@
 # model file: ../example-models/ARM/Ch.4/kidscore_momwork.stan
 import torch
 import pyro
+import pyro.distributions as dist
+
+def init_vector(name, dims=None):
+    return pyro.sample(name, dist.Normal(torch.zeros(dims), 0.2 * torch.ones(dims)))
+
 
 
 def validate_data_def(data):
@@ -40,7 +45,7 @@ def init_params(data, params):
     work4 = data["work4"]
     # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(4)) # vector
-    params["sigma"] = init_real("sigma", low=0) # real/double
+    params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
 
 def model(data, params):
     # initialize data
@@ -51,7 +56,8 @@ def model(data, params):
     work2 = data["work2"]
     work3 = data["work3"]
     work4 = data["work4"]
-    # INIT parameters
+    
+    # init parameters
     beta = params["beta"]
     sigma = params["sigma"]
     # initialize transformed parameters

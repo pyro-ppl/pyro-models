@@ -1,6 +1,11 @@
 # model file: ../example-models/bugs_examples/vol1/pump/pump.stan
 import torch
 import pyro
+import pyro.distributions as dist
+
+def init_vector(name, dims=None):
+    return pyro.sample(name, dist.Normal(torch.zeros(dims), 0.2 * torch.ones(dims)))
+
 
 
 def validate_data_def(data):
@@ -18,16 +23,17 @@ def init_params(data, params):
     x = data["x"]
     t = data["t"]
     # assign init values for parameters
-    params["alpha"] = init_real("alpha", low=0) # real/double
-    params["beta"] = init_real("beta", low=0) # real/double
-    params["theta"] = init_vector("theta", low=0, dims=(N)) # vector
+    params["alpha"] = pyro.sample("alpha", dist.Uniform(0))
+    params["beta"] = pyro.sample("beta", dist.Uniform(0))
+    params["theta"] = init_vector("theta", dist.Uniform(0., dims=(N)) # vector
 
 def model(data, params):
     # initialize data
     N = data["N"]
     x = data["x"]
     t = data["t"]
-    # INIT parameters
+    
+    # init parameters
     alpha = params["alpha"]
     beta = params["beta"]
     theta = params["theta"]

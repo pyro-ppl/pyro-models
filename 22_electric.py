@@ -1,6 +1,11 @@
 # model file: ../example-models/ARM/Ch.23/electric.stan
 import torch
 import pyro
+import pyro.distributions as dist
+
+def init_vector(name, dims=None):
+    return pyro.sample(name, dist.Normal(torch.zeros(dims), 0.2 * torch.ones(dims)))
+
 
 
 def validate_data_def(data):
@@ -25,10 +30,10 @@ def init_params(data, params):
     y = data["y"]
     # assign init values for parameters
     params["a"] = init_vector("a", dims=(n_pair)) # vector
-    params["beta"] = init_real("beta") # real/double
-    params["mu_a"] = init_real("mu_a") # real/double
-    params["sigma_a"] = init_real("sigma_a", low=0, high=100) # real/double
-    params["sigma_y"] = init_real("sigma_y", low=0, high=100) # real/double
+    params["beta"] = pyro.sample("beta"))
+    params["mu_a"] = pyro.sample("mu_a"))
+    params["sigma_a"] = pyro.sample("sigma_a", dist.Uniform(0., 100.))
+    params["sigma_y"] = pyro.sample("sigma_y", dist.Uniform(0., 100.))
 
 def model(data, params):
     # initialize data
@@ -37,7 +42,8 @@ def model(data, params):
     pair = data["pair"]
     treatment = data["treatment"]
     y = data["y"]
-    # INIT parameters
+    
+    # init parameters
     a = params["a"]
     beta = params["beta"]
     mu_a = params["mu_a"]
@@ -49,10 +55,10 @@ def model(data, params):
         y_hat[i - 1] = _pyro_assign(y_hat[i - 1], (_index_select(a, pair[i - 1] - 1)  + (beta * _index_select(treatment, i - 1) )))
     # model block
 
-    mu_a =  _pyro_sample(mu_a, "mu_a", "normal", [0, 1])
-    sigma_a =  _pyro_sample(sigma_a, "sigma_a", "uniform", [0, 100])
-    sigma_y =  _pyro_sample(sigma_y, "sigma_y", "uniform", [0, 100])
+    mu_a =  _pyro_sample(mu_a, "mu_a", "normal", [0., 1])
+    sigma_a =  _pyro_sample(sigma_a, "sigma_a", "uniform", [0., 100])
+    sigma_y =  _pyro_sample(sigma_y, "sigma_y", "uniform", [0., 100])
     a =  _pyro_sample(a, "a", "normal", [(100 * mu_a), sigma_a])
-    beta =  _pyro_sample(beta, "beta", "normal", [0, 1])
+    beta =  _pyro_sample(beta, "beta", "normal", [0., 1])
     y =  _pyro_sample(y, "y", "normal", [y_hat, sigma_y], obs=y)
 

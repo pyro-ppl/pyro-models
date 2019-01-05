@@ -1,6 +1,11 @@
 # model file: ../example-models/bugs_examples/vol2/beetles/beetles_probit.stan
 import torch
 import pyro
+import pyro.distributions as dist
+
+def init_vector(name, dims=None):
+    return pyro.sample(name, dist.Normal(torch.zeros(dims), 0.2 * torch.ones(dims)))
+
 
 
 def validate_data_def(data):
@@ -21,7 +26,7 @@ def transformed_data(data):
     r = data["r"]
     x = data["x"]
     centered_x = init_vector("centered_x", dims=(N)) # vector
-    mean_x = init_real("mean_x") # real/double
+    mean_x = pyro.sample("mean_x"))
     mean_x = _pyro_assign(mean_x, _call_func("mean", [x]))
     centered_x = _pyro_assign(centered_x, _call_func("subtract", [x,mean_x]))
     data["centered_x"] = centered_x
@@ -37,8 +42,8 @@ def init_params(data, params):
     centered_x = data["centered_x"]
     mean_x = data["mean_x"]
     # assign init values for parameters
-    params["alpha_star"] = init_real("alpha_star") # real/double
-    params["beta"] = init_real("beta") # real/double
+    params["alpha_star"] = pyro.sample("alpha_star"))
+    params["beta"] = pyro.sample("beta"))
 
 def model(data, params):
     # initialize data
@@ -49,16 +54,17 @@ def model(data, params):
     # initialize transformed data
     centered_x = data["centered_x"]
     mean_x = data["mean_x"]
-    # INIT parameters
+    
+    # init parameters
     alpha_star = params["alpha_star"]
     beta = params["beta"]
     # initialize transformed parameters
-    p = init_real("p", dims=(N)) # real/double
+    p = pyro.sample("p", dims=(N)))
     for i in range(1, to_int(N) + 1):
         p[i - 1] = _pyro_assign(p[i - 1], _call_func("Phi", [(alpha_star + (beta * _index_select(centered_x, i - 1) ))]))
     # model block
 
-    alpha_star =  _pyro_sample(alpha_star, "alpha_star", "normal", [0.0, 1.0])
-    beta =  _pyro_sample(beta, "beta", "normal", [0.0, 10000.0])
+    alpha_star =  _pyro_sample(alpha_star, "alpha_star", "normal", [0.0., 1.0])
+    beta =  _pyro_sample(beta, "beta", "normal", [0.0., 10000.0])
     r =  _pyro_sample(r, "r", "binomial", [n, p], obs=r)
 

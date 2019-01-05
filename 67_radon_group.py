@@ -1,6 +1,11 @@
 # model file: ../example-models/ARM/Ch.12/radon_group.stan
 import torch
 import pyro
+import pyro.distributions as dist
+
+def init_vector(name, dims=None):
+    return pyro.sample(name, dist.Normal(torch.zeros(dims), 0.2 * torch.ones(dims)))
+
 
 
 def validate_data_def(data):
@@ -29,11 +34,11 @@ def init_params(data, params):
     # assign init values for parameters
     params["alpha"] = init_vector("alpha", dims=(J)) # vector
     params["beta"] = init_vector("beta", dims=(2)) # vector
-    params["mu_alpha"] = init_real("mu_alpha") # real/double
-    params["mu_beta"] = init_real("mu_beta") # real/double
-    params["sigma"] = init_real("sigma", low=0) # real/double
-    params["sigma_alpha"] = init_real("sigma_alpha", low=0) # real/double
-    params["sigma_beta"] = init_real("sigma_beta", low=0) # real/double
+    params["mu_alpha"] = pyro.sample("mu_alpha"))
+    params["mu_beta"] = pyro.sample("mu_beta"))
+    params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
+    params["sigma_alpha"] = pyro.sample("sigma_alpha", dist.Uniform(0))
+    params["sigma_beta"] = pyro.sample("sigma_beta", dist.Uniform(0))
 
 def model(data, params):
     # initialize data
@@ -43,7 +48,8 @@ def model(data, params):
     u = data["u"]
     x = data["x"]
     y = data["y"]
-    # INIT parameters
+    
+    # init parameters
     alpha = params["alpha"]
     beta = params["beta"]
     mu_alpha = params["mu_alpha"]
@@ -60,11 +66,11 @@ def model(data, params):
         y_hat[i - 1] = _pyro_assign(y_hat[i - 1], ((_index_select(alpha, county[i - 1] - 1)  + (_index_select(x, i - 1)  * _index_select(beta, 1 - 1) )) + (_index_select(u, i - 1)  * _index_select(beta, 2 - 1) )))
     alpha =  _pyro_sample(alpha, "alpha", "normal", [mu_alpha, sigma_alpha])
     beta =  _pyro_sample(beta, "beta", "normal", [mu_beta, sigma_beta])
-    sigma =  _pyro_sample(sigma, "sigma", "cauchy", [0, 2.5])
-    mu_alpha =  _pyro_sample(mu_alpha, "mu_alpha", "normal", [0, 1])
-    sigma_alpha =  _pyro_sample(sigma_alpha, "sigma_alpha", "cauchy", [0, 2.5])
-    mu_beta =  _pyro_sample(mu_beta, "mu_beta", "normal", [0, 1])
-    sigma_beta =  _pyro_sample(sigma_beta, "sigma_beta", "cauchy", [0, 2.5])
+    sigma =  _pyro_sample(sigma, "sigma", "cauchy", [0., 2.5])
+    mu_alpha =  _pyro_sample(mu_alpha, "mu_alpha", "normal", [0., 1])
+    sigma_alpha =  _pyro_sample(sigma_alpha, "sigma_alpha", "cauchy", [0., 2.5])
+    mu_beta =  _pyro_sample(mu_beta, "mu_beta", "normal", [0., 1])
+    sigma_beta =  _pyro_sample(sigma_beta, "sigma_beta", "cauchy", [0., 2.5])
     y =  _pyro_sample(y, "y", "normal", [y_hat, sigma], obs=y)
     # }
 

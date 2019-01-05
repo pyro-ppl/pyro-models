@@ -1,6 +1,11 @@
 # model file: ../example-models/bugs_examples/vol1/dyes/dyes.stan
 import torch
 import pyro
+import pyro.distributions as dist
+
+def init_vector(name, dims=None):
+    return pyro.sample(name, dist.Normal(torch.zeros(dims), 0.2 * torch.ones(dims)))
+
 
 
 def validate_data_def(data):
@@ -18,29 +23,30 @@ def init_params(data, params):
     SAMPLES = data["SAMPLES"]
     y = data["y"]
     # assign init values for parameters
-    params["tau_between"] = init_real("tau_between", low=0) # real/double
-    params["tau_within"] = init_real("tau_within", low=0) # real/double
-    params["theta"] = init_real("theta") # real/double
-    params["mu"] = init_real("mu", dims=(BATCHES)) # real/double
+    params["tau_between"] = pyro.sample("tau_between", dist.Uniform(0))
+    params["tau_within"] = pyro.sample("tau_within", dist.Uniform(0))
+    params["theta"] = pyro.sample("theta"))
+    params["mu"] = pyro.sample("mu", dims=(BATCHES)))
 
 def model(data, params):
     # initialize data
     BATCHES = data["BATCHES"]
     SAMPLES = data["SAMPLES"]
     y = data["y"]
-    # INIT parameters
+    
+    # init parameters
     tau_between = params["tau_between"]
     tau_within = params["tau_within"]
     theta = params["theta"]
     mu = params["mu"]
     # initialize transformed parameters
-    sigma_between = init_real("sigma_between") # real/double
-    sigma_within = init_real("sigma_within") # real/double
+    sigma_between = pyro.sample("sigma_between"))
+    sigma_within = pyro.sample("sigma_within"))
     sigma_between = _pyro_assign(sigma_between, (1 / _call_func("sqrt", [tau_between])))
     sigma_within = _pyro_assign(sigma_within, (1 / _call_func("sqrt", [tau_within])))
     # model block
 
-    theta =  _pyro_sample(theta, "theta", "normal", [0.0, 100000.0])
+    theta =  _pyro_sample(theta, "theta", "normal", [0.0., 100000.0])
     tau_between =  _pyro_sample(tau_between, "tau_between", "gamma", [0.001, 0.001])
     tau_within =  _pyro_sample(tau_within, "tau_within", "gamma", [0.001, 0.001])
     mu =  _pyro_sample(mu, "mu", "normal", [theta, sigma_between])

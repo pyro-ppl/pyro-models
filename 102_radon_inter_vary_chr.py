@@ -1,6 +1,11 @@
 # model file: ../example-models/ARM/Ch.13/radon_inter_vary_chr.stan
 import torch
 import pyro
+import pyro.distributions as dist
+
+def init_vector(name, dims=None):
+    return pyro.sample(name, dist.Normal(torch.zeros(dims), 0.2 * torch.ones(dims)))
+
 
 
 def validate_data_def(data):
@@ -40,11 +45,11 @@ def init_params(data, params):
     params["beta"] = init_vector("beta", dims=(2)) # vector
     params["eta1"] = init_vector("eta1", dims=(85)) # vector
     params["eta2"] = init_vector("eta2", dims=(85)) # vector
-    params["mu_a1"] = init_real("mu_a1") # real/double
-    params["mu_a2"] = init_real("mu_a2") # real/double
-    params["sigma_a1"] = init_real("sigma_a1", low=0, high=100) # real/double
-    params["sigma_a2"] = init_real("sigma_a2", low=0, high=100) # real/double
-    params["sigma_y"] = init_real("sigma_y", low=0, high=100) # real/double
+    params["mu_a1"] = pyro.sample("mu_a1"))
+    params["mu_a2"] = pyro.sample("mu_a2"))
+    params["sigma_a1"] = pyro.sample("sigma_a1", dist.Uniform(0., 100.))
+    params["sigma_a2"] = pyro.sample("sigma_a2", dist.Uniform(0., 100.))
+    params["sigma_y"] = pyro.sample("sigma_y", dist.Uniform(0., 100.))
 
 def model(data, params):
     # initialize data
@@ -55,7 +60,8 @@ def model(data, params):
     y = data["y"]
     # initialize transformed data
     inter = data["inter"]
-    # INIT parameters
+    
+    # init parameters
     beta = params["beta"]
     eta1 = params["eta1"]
     eta2 = params["eta2"]
@@ -74,10 +80,10 @@ def model(data, params):
         y_hat[i - 1] = _pyro_assign(y_hat[i - 1], (((_index_select(a1, county[i - 1] - 1)  + (_index_select(x, i - 1)  * _index_select(a2, county[i - 1] - 1) )) + (_index_select(beta, 1 - 1)  * _index_select(u, i - 1) )) + (_index_select(beta, 2 - 1)  * _index_select(inter, i - 1) )))
     # model block
 
-    beta =  _pyro_sample(beta, "beta", "normal", [0, 100])
-    mu_a1 =  _pyro_sample(mu_a1, "mu_a1", "normal", [0, 1])
-    mu_a2 =  _pyro_sample(mu_a2, "mu_a2", "normal", [0, 1])
-    eta1 =  _pyro_sample(eta1, "eta1", "normal", [0, 1])
-    eta2 =  _pyro_sample(eta2, "eta2", "normal", [0, 1])
+    beta =  _pyro_sample(beta, "beta", "normal", [0., 100])
+    mu_a1 =  _pyro_sample(mu_a1, "mu_a1", "normal", [0., 1])
+    mu_a2 =  _pyro_sample(mu_a2, "mu_a2", "normal", [0., 1])
+    eta1 =  _pyro_sample(eta1, "eta1", "normal", [0., 1])
+    eta2 =  _pyro_sample(eta2, "eta2", "normal", [0., 1])
     y =  _pyro_sample(y, "y", "normal", [y_hat, sigma_y], obs=y)
 

@@ -1,6 +1,11 @@
 # model file: ../example-models/Bayesian_Cognitive_Modeling/ParameterEstimation/Binomial/Rate_4.stan
 import torch
 import pyro
+import pyro.distributions as dist
+
+def init_vector(name, dims=None):
+    return pyro.sample(name, dist.Normal(torch.zeros(dims), 0.2 * torch.ones(dims)))
+
 
 
 def validate_data_def(data):
@@ -15,14 +20,15 @@ def init_params(data, params):
     n = data["n"]
     k = data["k"]
     # assign init values for parameters
-    params["theta"] = init_real("theta", low=0, high=1) # real/double
-    params["thetaprior"] = init_real("thetaprior", low=0, high=1) # real/double
+    params["theta"] = pyro.sample("theta", dist.Uniform(0., 1))
+    params["thetaprior"] = pyro.sample("thetaprior", dist.Uniform(0., 1))
 
 def model(data, params):
     # initialize data
     n = data["n"]
     k = data["k"]
-    # INIT parameters
+    
+    # init parameters
     theta = params["theta"]
     thetaprior = params["thetaprior"]
     # initialize transformed parameters

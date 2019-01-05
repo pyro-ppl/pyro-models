@@ -1,6 +1,11 @@
 # model file: ../example-models/ARM/Ch.13/radon_inter_vary.stan
 import torch
 import pyro
+import pyro.distributions as dist
+
+def init_vector(name, dims=None):
+    return pyro.sample(name, dist.Normal(torch.zeros(dims), 0.2 * torch.ones(dims)))
+
 
 
 def validate_data_def(data):
@@ -40,13 +45,13 @@ def init_params(data, params):
     params["a"] = init_vector("a", dims=(85)) # vector
     params["b"] = init_vector("b", dims=(85)) # vector
     params["beta"] = init_vector("beta", dims=(2)) # vector
-    params["mu_a"] = init_real("mu_a") # real/double
-    params["mu_b"] = init_real("mu_b") # real/double
-    params["mu_beta"] = init_real("mu_beta") # real/double
-    params["sigma_a"] = init_real("sigma_a", low=0, high=100) # real/double
-    params["sigma_b"] = init_real("sigma_b", low=0, high=100) # real/double
-    params["sigma_beta"] = init_real("sigma_beta", low=0, high=100) # real/double
-    params["sigma_y"] = init_real("sigma_y", low=0, high=100) # real/double
+    params["mu_a"] = pyro.sample("mu_a"))
+    params["mu_b"] = pyro.sample("mu_b"))
+    params["mu_beta"] = pyro.sample("mu_beta"))
+    params["sigma_a"] = pyro.sample("sigma_a", dist.Uniform(0., 100.))
+    params["sigma_b"] = pyro.sample("sigma_b", dist.Uniform(0., 100.))
+    params["sigma_beta"] = pyro.sample("sigma_beta", dist.Uniform(0., 100.))
+    params["sigma_y"] = pyro.sample("sigma_y", dist.Uniform(0., 100.))
 
 def model(data, params):
     # initialize data
@@ -57,7 +62,8 @@ def model(data, params):
     y = data["y"]
     # initialize transformed data
     inter = data["inter"]
-    # INIT parameters
+    
+    # init parameters
     a = params["a"]
     b = params["b"]
     beta = params["beta"]
@@ -74,11 +80,11 @@ def model(data, params):
         y_hat[i - 1] = _pyro_assign(y_hat[i - 1], (((_index_select(a, county[i - 1] - 1)  + (_index_select(x, i - 1)  * _index_select(b, county[i - 1] - 1) )) + (_index_select(beta, 1 - 1)  * _index_select(u, i - 1) )) + (_index_select(beta, 2 - 1)  * _index_select(inter, i - 1) )))
     # model block
 
-    mu_beta =  _pyro_sample(mu_beta, "mu_beta", "normal", [0, 1])
+    mu_beta =  _pyro_sample(mu_beta, "mu_beta", "normal", [0., 1])
     beta =  _pyro_sample(beta, "beta", "normal", [(100 * mu_beta), sigma_beta])
-    mu_a =  _pyro_sample(mu_a, "mu_a", "normal", [0, 1])
+    mu_a =  _pyro_sample(mu_a, "mu_a", "normal", [0., 1])
     a =  _pyro_sample(a, "a", "normal", [mu_a, sigma_a])
-    mu_b =  _pyro_sample(mu_b, "mu_b", "normal", [0, 1])
+    mu_b =  _pyro_sample(mu_b, "mu_b", "normal", [0., 1])
     b =  _pyro_sample(b, "b", "normal", [(0.10000000000000001 * mu_b), sigma_b])
     y =  _pyro_sample(y, "y", "normal", [y_hat, sigma_y], obs=y)
 

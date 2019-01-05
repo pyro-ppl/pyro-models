@@ -1,6 +1,11 @@
 # model file: ../example-models/ARM/Ch.3/kidiq_multi_preds.stan
 import torch
 import pyro
+import pyro.distributions as dist
+
+def init_vector(name, dims=None):
+    return pyro.sample(name, dist.Normal(torch.zeros(dims), 0.2 * torch.ones(dims)))
+
 
 
 def validate_data_def(data):
@@ -22,7 +27,7 @@ def init_params(data, params):
     mom_hs = data["mom_hs"]
     # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(3)) # vector
-    params["sigma"] = init_real("sigma", low=0) # real/double
+    params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
 
 def model(data, params):
     # initialize data
@@ -30,12 +35,13 @@ def model(data, params):
     kid_score = data["kid_score"]
     mom_iq = data["mom_iq"]
     mom_hs = data["mom_hs"]
-    # INIT parameters
+    
+    # init parameters
     beta = params["beta"]
     sigma = params["sigma"]
     # initialize transformed parameters
     # model block
 
-    sigma =  _pyro_sample(sigma, "sigma", "cauchy", [0, 2.5])
+    sigma =  _pyro_sample(sigma, "sigma", "cauchy", [0., 2.5])
     kid_score =  _pyro_sample(kid_score, "kid_score", "normal", [_call_func("add", [_call_func("add", [_index_select(beta, 1 - 1) ,_call_func("multiply", [_index_select(beta, 2 - 1) ,mom_hs])]),_call_func("multiply", [_index_select(beta, 3 - 1) ,mom_iq])]), sigma], obs=kid_score)
 

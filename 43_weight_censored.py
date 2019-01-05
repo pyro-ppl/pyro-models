@@ -1,6 +1,11 @@
 # model file: ../example-models/ARM/Ch.18/weight_censored.stan
 import torch
 import pyro
+import pyro.distributions as dist
+
+def init_vector(name, dims=None):
+    return pyro.sample(name, dist.Normal(torch.zeros(dims), 0.2 * torch.ones(dims)))
+
 
 
 def validate_data_def(data):
@@ -30,8 +35,8 @@ def transformed_data(data):
     weight_obs = init_vector("weight_obs", dims=(N_obs)) # vector
     c_height_obs = init_vector("c_height_obs", dims=(N_obs)) # vector
     c_height_cens = init_vector("c_height_cens", dims=(N_cens)) # vector
-    i = init_int("i") # real/double
-    j = init_int("j") # real/double
+    i = init_int("i"))
+    j = init_int("j"))
     c_height = _pyro_assign(c_height, _call_func("subtract", [height,_call_func("mean", [height])]))
     i = _pyro_assign(i, 1)
     j = _pyro_assign(j, 1)
@@ -70,10 +75,10 @@ def init_params(data, params):
     i = data["i"]
     j = data["j"]
     # assign init values for parameters
-    params["weight_cens"] = init_vector("weight_cens", low=C, dims=(N_cens)) # vector
-    params["a"] = init_real("a") # real/double
-    params["b"] = init_real("b") # real/double
-    params["sigma"] = init_real("sigma", low=0) # real/double
+    params["weight_cens"] = init_vector("weight_cens", dist.Uniform(C, dims=(N_cens)) # vector
+    params["a"] = pyro.sample("a"))
+    params["b"] = pyro.sample("b"))
+    params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
 
 def model(data, params):
     # initialize data
@@ -90,7 +95,8 @@ def model(data, params):
     c_height_cens = data["c_height_cens"]
     i = data["i"]
     j = data["j"]
-    # INIT parameters
+    
+    # init parameters
     weight_cens = params["weight_cens"]
     a = params["a"]
     b = params["b"]

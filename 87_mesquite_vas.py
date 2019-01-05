@@ -1,6 +1,11 @@
 # model file: ../example-models/ARM/Ch.4/mesquite_vas.stan
 import torch
 import pyro
+import pyro.distributions as dist
+
+def init_vector(name, dims=None):
+    return pyro.sample(name, dist.Normal(torch.zeros(dims), 0.2 * torch.ones(dims)))
+
 
 
 def validate_data_def(data):
@@ -70,7 +75,7 @@ def init_params(data, params):
     log_density = data["log_density"]
     # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(7)) # vector
-    params["sigma"] = init_real("sigma", low=0) # real/double
+    params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
 
 def model(data, params):
     # initialize data
@@ -89,7 +94,8 @@ def model(data, params):
     log_canopy_shape = data["log_canopy_shape"]
     log_total_height = data["log_total_height"]
     log_density = data["log_density"]
-    # INIT parameters
+    
+    # init parameters
     beta = params["beta"]
     sigma = params["sigma"]
     # initialize transformed parameters

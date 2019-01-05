@@ -1,6 +1,11 @@
 # model file: ../example-models/misc/irt/irt_multilevel.stan
 import torch
 import pyro
+import pyro.distributions as dist
+
+def init_vector(name, dims=None):
+    return pyro.sample(name, dist.Normal(torch.zeros(dims), 0.2 * torch.ones(dims)))
+
 
 
 def validate_data_def(data):
@@ -27,11 +32,11 @@ def init_params(data, params):
     kk = data["kk"]
     y = data["y"]
     # assign init values for parameters
-    params["delta"] = init_real("delta") # real/double
-    params["alpha"] = init_real("alpha", dims=(J)) # real/double
-    params["beta"] = init_real("beta", dims=(K)) # real/double
-    params["sigma_alpha"] = init_real("sigma_alpha", low=0) # real/double
-    params["sigma_beta"] = init_real("sigma_beta", low=0) # real/double
+    params["delta"] = pyro.sample("delta"))
+    params["alpha"] = pyro.sample("alpha", dims=(J)))
+    params["beta"] = pyro.sample("beta", dims=(K)))
+    params["sigma_alpha"] = pyro.sample("sigma_alpha", dist.Uniform(0))
+    params["sigma_beta"] = pyro.sample("sigma_beta", dist.Uniform(0))
 
 def model(data, params):
     # initialize data
@@ -41,7 +46,8 @@ def model(data, params):
     jj = data["jj"]
     kk = data["kk"]
     y = data["y"]
-    # INIT parameters
+    
+    # init parameters
     delta = params["delta"]
     alpha = params["alpha"]
     beta = params["beta"]
@@ -50,8 +56,8 @@ def model(data, params):
     # initialize transformed parameters
     # model block
 
-    alpha =  _pyro_sample(alpha, "alpha", "normal", [0, sigma_alpha])
-    beta =  _pyro_sample(beta, "beta", "normal", [0, sigma_beta])
+    alpha =  _pyro_sample(alpha, "alpha", "normal", [0., sigma_alpha])
+    beta =  _pyro_sample(beta, "beta", "normal", [0., sigma_beta])
     delta =  _pyro_sample(delta, "delta", "normal", [0.75, 1])
     for n in range(1, to_int(N) + 1):
         y[n - 1] =  _pyro_sample(_index_select(y, n - 1) , "y[%d]" % (to_int(n-1)), "bernoulli_logit", [((_index_select(alpha, jj[n - 1] - 1)  - _index_select(beta, kk[n - 1] - 1) ) + delta)], obs=_index_select(y, n - 1) )

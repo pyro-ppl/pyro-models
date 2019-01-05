@@ -1,6 +1,11 @@
 # model file: ../example-models/bugs_examples/vol1/litter/litter.stan
 import torch
 import pyro
+import pyro.distributions as dist
+
+def init_vector(name, dims=None):
+    return pyro.sample(name, dist.Normal(torch.zeros(dims), 0.2 * torch.ones(dims)))
+
 
 
 def validate_data_def(data):
@@ -21,9 +26,9 @@ def init_params(data, params):
     r = data["r"]
     n = data["n"]
     # assign init values for parameters
-    params["p"] = init_matrix("p", low=0, high=1, dims=(G, N)) # matrix
-    params["mu"] = init_vector("mu", low=0, high=1, dims=(G)) # vector
-    params["a_plus_b"] = init_vector("a_plus_b", low=0.10000000000000001, dims=(G)) # vector
+    params["p"] = init_matrix("p", dist.Uniform(0., 1, dims=(G, N)) # matrix
+    params["mu"] = init_vector("mu", dist.Uniform(0., 1, dims=(G)) # vector
+    params["a_plus_b"] = init_vector("a_plus_b", dist.Uniform(0.10000000000000001, dims=(G)) # vector
 
 def model(data, params):
     # initialize data
@@ -31,7 +36,8 @@ def model(data, params):
     N = data["N"]
     r = data["r"]
     n = data["n"]
-    # INIT parameters
+    
+    # init parameters
     p = params["p"]
     mu = params["mu"]
     a_plus_b = params["a_plus_b"]

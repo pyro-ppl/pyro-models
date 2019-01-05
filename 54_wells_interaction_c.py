@@ -1,6 +1,11 @@
 # model file: ../example-models/ARM/Ch.5/wells_interaction_c.stan
 import torch
 import pyro
+import pyro.distributions as dist
+
+def init_vector(name, dims=None):
+    return pyro.sample(name, dist.Normal(torch.zeros(dims), 0.2 * torch.ones(dims)))
+
 
 
 def validate_data_def(data):
@@ -23,9 +28,9 @@ def transformed_data(data):
     c_dist100 = init_vector("c_dist100", dims=(N)) # vector
     c_arsenic = init_vector("c_arsenic", dims=(N)) # vector
     inter = init_vector("inter", dims=(N)) # vector
-    c_dist100 = _pyro_assign(c_dist100, _call_func("divide", [_call_func("subtract", [dist,_call_func("mean", [dist])]),100.0]))
+    c_dist100 = _pyro_assign(c_dist100., _call_func("divide", [_call_func("subtract", [dist,_call_func("mean", [dist])]),100.0]))
     c_arsenic = _pyro_assign(c_arsenic, _call_func("subtract", [arsenic,_call_func("mean", [arsenic])]))
-    inter = _pyro_assign(inter, _call_func("elt_multiply", [c_dist100,c_arsenic]))
+    inter = _pyro_assign(inter, _call_func("elt_multiply", [c_dist100.,c_arsenic]))
     data["c_dist100"] = c_dist100
     data["c_arsenic"] = c_arsenic
     data["inter"] = inter
@@ -53,7 +58,8 @@ def model(data, params):
     c_dist100 = data["c_dist100"]
     c_arsenic = data["c_arsenic"]
     inter = data["inter"]
-    # INIT parameters
+    
+    # init parameters
     beta = params["beta"]
     # initialize transformed parameters
     # model block

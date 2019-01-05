@@ -1,6 +1,11 @@
 # model file: ../example-models/bugs_examples/vol2/cervix/cervix2.stan
 import torch
 import pyro
+import pyro.distributions as dist
+
+def init_vector(name, dims=None):
+    return pyro.sample(name, dist.Normal(torch.zeros(dims), 0.2 * torch.ones(dims)))
+
 
 
 def validate_data_def(data):
@@ -30,10 +35,10 @@ def init_params(data, params):
     wi = data["wi"]
     di = data["di"]
     # assign init values for parameters
-    params["phi"] = init_real("phi", low=0, high=1, dims=(2, 2)) # real/double
-    params["q"] = init_real("q", low=0, high=1) # real/double
-    params["beta0C"] = init_real("beta0C") # real/double
-    params["beta"] = init_real("beta") # real/double
+    params["phi"] = pyro.sample("phi", dist.Uniform(0., 1, dims=(2, 2)))
+    params["q"] = pyro.sample("q", dist.Uniform(0., 1))
+    params["beta0C"] = pyro.sample("beta0C"))
+    params["beta"] = pyro.sample("beta"))
 
 def model(data, params):
     # initialize data
@@ -44,7 +49,8 @@ def model(data, params):
     dc = data["dc"]
     wi = data["wi"]
     di = data["di"]
-    # INIT parameters
+    
+    # init parameters
     phi = params["phi"]
     q = params["q"]
     beta0C = params["beta0C"]
@@ -61,10 +67,10 @@ def model(data, params):
 
         di[n - 1] =  _pyro_sample(_index_select(di, n - 1) , "di[%d]" % (to_int(n-1)), "bernoulli", [((_call_func("inv_logit", [(beta0C + beta)]) * q) + (_call_func("inv_logit", [beta0C]) * (1 - q)))], obs=_index_select(di, n - 1) )
         wi[n - 1] =  _pyro_sample(_index_select(wi, n - 1) , "wi[%d]" % (to_int(n-1)), "bernoulli", [((_index_select(_index_select(phi, 1 - 1) , (di[n - 1] + 1) - 1)  * (1 - q)) + (_index_select(_index_select(phi, 2 - 1) , (di[n - 1] + 1) - 1)  * q))], obs=_index_select(wi, n - 1) )
-    q =  _pyro_sample(q, "q", "uniform", [0, 1])
-    beta0C =  _pyro_sample(beta0C, "beta0C", "normal", [0, 320])
-    beta =  _pyro_sample(beta, "beta", "normal", [0, 320])
+    q =  _pyro_sample(q, "q", "uniform", [0., 1])
+    beta0C =  _pyro_sample(beta0C, "beta0C", "normal", [0., 320])
+    beta =  _pyro_sample(beta, "beta", "normal", [0., 320])
     for i in range(1, 2 + 1):
         for j in range(1, 2 + 1):
-            phi[i - 1][j - 1] =  _pyro_sample(_index_select(_index_select(phi, i - 1) , j - 1) , "phi[%d][%d]" % (to_int(i-1),to_int(j-1)), "uniform", [0, 1])
+            phi[i - 1][j - 1] =  _pyro_sample(_index_select(_index_select(phi, i - 1) , j - 1) , "phi[%d][%d]" % (to_int(i-1),to_int(j-1)), "uniform", [0., 1])
 
