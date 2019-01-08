@@ -43,41 +43,6 @@ def validate_data_def(data):
 
 def init_params(data):
     params = {}
-    # initialize data
-    N = data["N"]
-    n_age = data["n_age"]
-    n_age_edu = data["n_age_edu"]
-    n_edu = data["n_edu"]
-    n_region = data["n_region"]
-    n_state = data["n_state"]
-    age = data["age"]
-    age_edu = data["age_edu"]
-    black = data["black"]
-    edu = data["edu"]
-    female = data["female"]
-    region = data["region"]
-    state = data["state"]
-    v_prev = data["v_prev"]
-    y = data["y"]
-    # assign init values for parameters
-    params["b_age"] = init_vector("b_age", dims=(n_age)) # vector
-    params["b_age_edu"] = init_vector("b_age_edu", dims=(n_age_edu)) # vector
-    params["b_edu"] = init_vector("b_edu", dims=(n_edu)) # vector
-    params["b_region"] = init_vector("b_region", dims=(n_region)) # vector
-    params["b_state"] = init_vector("b_state", dims=(n_state)) # vector
-    params["b_v_prev"] = pyro.sample("b_v_prev"))
-    params["beta"] = init_vector("beta", dims=(4)) # vector
-    params["mu"] = pyro.sample("mu"))
-    params["mu_age"] = pyro.sample("mu_age"))
-    params["mu_age_edu"] = pyro.sample("mu_age_edu"))
-    params["mu_edu"] = pyro.sample("mu_edu"))
-    params["mu_region"] = pyro.sample("mu_region"))
-    params["sigma_age"] = pyro.sample("sigma_age", dist.Uniform(0., 100.))
-    params["sigma_edu"] = pyro.sample("sigma_edu", dist.Uniform(0., 100.))
-    params["sigma_age_edu"] = pyro.sample("sigma_age_edu", dist.Uniform(0., 100.))
-    params["sigma_region"] = pyro.sample("sigma_region", dist.Uniform(0., 100.))
-    params["sigma_state"] = pyro.sample("sigma_state", dist.Uniform(0., 100.))
-
     return params
 
 def model(data, params):
@@ -88,71 +53,43 @@ def model(data, params):
     n_edu = data["n_edu"]
     n_region = data["n_region"]
     n_state = data["n_state"]
-    age = data["age"]
-    age_edu = data["age_edu"]
+    age = data["age"].long() - 1
+    age_edu = data["age_edu"].long() - 1
     black = data["black"]
-    edu = data["edu"]
+    edu = data["edu"].long() - 1
     female = data["female"]
-    region = data["region"]
-    state = data["state"]
+    region = data["region"].long() - 1
+    state = data["state"].long() - 1
     v_prev = data["v_prev"]
     y = data["y"]
-    
-    # init parameters
-    b_age = params["b_age"]
-    b_age_edu = params["b_age_edu"]
-    b_edu = params["b_edu"]
-    b_region = params["b_region"]
-    b_state = params["b_state"]
-    b_v_prev = params["b_v_prev"]
-    beta = params["beta"]
-    mu = params["mu"]
-    mu_age = params["mu_age"]
-    mu_age_edu = params["mu_age_edu"]
-    mu_edu = params["mu_edu"]
-    mu_region = params["mu_region"]
-    sigma_age = params["sigma_age"]
-    sigma_edu = params["sigma_edu"]
-    sigma_age_edu = params["sigma_age_edu"]
-    sigma_region = params["sigma_region"]
-    sigma_state = params["sigma_state"]
-    # initialize transformed parameters
-    b_age_adj = init_vector("b_age_adj", dims=(n_age)) # vector
-    b_age_edu_adj = init_vector("b_age_edu_adj", dims=(n_age_edu)) # vector
-    b_edu_adj = init_vector("b_edu_adj", dims=(n_edu)) # vector
-    b_region_adj = init_vector("b_region_adj", dims=(n_region)) # vector
-    b_state_hat = init_vector("b_state_hat", dims=(n_state)) # vector
-    mu_adj = pyro.sample("mu_adj"))
-    Xbeta = init_vector("Xbeta", dims=(N)) # vector
-    p = init_vector("p", dims=(N)) # vector
-    p_bound = init_vector("p_bound", dims=(N)) # vector
-    for i in range(1, to_int(N) + 1):
-        Xbeta[i - 1] = _pyro_assign(Xbeta[i - 1], (((((((_index_select(beta, 1 - 1)  + (_index_select(beta, 2 - 1)  * _index_select(female, i - 1) )) + (_index_select(beta, 3 - 1)  * _index_select(black, i - 1) )) + ((_index_select(beta, 4 - 1)  * _index_select(female, i - 1) ) * _index_select(black, i - 1) )) + _index_select(b_age, age[i - 1] - 1) ) + _index_select(b_edu, edu[i - 1] - 1) ) + _index_select(b_age_edu, age_edu[i - 1] - 1) ) + _index_select(b_state, state[i - 1] - 1) ))
-    mu_adj = _pyro_assign(mu_adj, ((((_index_select(beta, 1 - 1)  + _call_func("mean", [b_age])) + _call_func("mean", [b_edu])) + _call_func("mean", [b_age_edu])) + _call_func("mean", [b_state])))
-    b_age_adj = _pyro_assign(b_age_adj, _call_func("subtract", [b_age,_call_func("mean", [b_age])]))
-    b_edu_adj = _pyro_assign(b_edu_adj, _call_func("subtract", [b_edu,_call_func("mean", [b_edu])]))
-    b_age_edu_adj = _pyro_assign(b_age_edu_adj, _call_func("subtract", [b_age_edu,_call_func("mean", [b_age_edu])]))
-    b_region_adj = _pyro_assign(b_region_adj, _call_func("subtract", [b_region,_call_func("mean", [b_region])]))
-    for j in range(1, to_int(n_state) + 1):
-        b_state_hat[j - 1] = _pyro_assign(b_state_hat[j - 1], (_index_select(b_region, region[j - 1] - 1)  + ((100 * b_v_prev) * _index_select(v_prev, j - 1) )))
-    # model block
 
-    mu_age =  _pyro_sample(mu_age, "mu_age", "normal", [0., 1])
-    mu_edu =  _pyro_sample(mu_edu, "mu_edu", "normal", [0., 1])
-    mu_age_edu =  _pyro_sample(mu_age_edu, "mu_age_edu", "normal", [0., 1])
-    mu_region =  _pyro_sample(mu_region, "mu_region", "normal", [0., 1])
-    mu =  _pyro_sample(mu, "mu", "normal", [0., 100])
-    sigma_age =  _pyro_sample(sigma_age, "sigma_age", "uniform", [0., 100])
-    sigma_edu =  _pyro_sample(sigma_edu, "sigma_edu", "uniform", [0., 100])
-    sigma_age_edu =  _pyro_sample(sigma_age_edu, "sigma_age_edu", "uniform", [0., 100])
-    sigma_region =  _pyro_sample(sigma_region, "sigma_region", "uniform", [0., 100])
-    sigma_state =  _pyro_sample(sigma_state, "sigma_state", "uniform", [0., 100])
-    beta =  _pyro_sample(beta, "beta", "normal", [0., 100])
-    b_age =  _pyro_sample(b_age, "b_age", "normal", [(100 * mu_age), sigma_age])
-    b_edu =  _pyro_sample(b_edu, "b_edu", "normal", [(100 * mu_edu), sigma_edu])
-    b_age_edu =  _pyro_sample(b_age_edu, "b_age_edu", "normal", [(100 * mu_age_edu), sigma_age_edu])
-    b_state =  _pyro_sample(b_state, "b_state", "normal", [b_state_hat, sigma_state])
-    b_v_prev =  _pyro_sample(b_v_prev, "b_v_prev", "normal", [0., 1])
-    b_region =  _pyro_sample(b_region, "b_region", "normal", [(100 * mu_region), sigma_region])
-    y =  _pyro_sample(y, "y", "bernoulli_logit", [Xbeta], obs=y)
+    # model block
+    mu_age =  pyro.sample("mu_age", dist.Normal(0., 1.))
+    mu_edu =  pyro.sample("mu_edu", dist.Normal(0., 1.))
+    mu_age_edu =  pyro.sample("mu_age_edu", dist.Normal(0., 1.))
+    mu_region =  pyro.sample("mu_region", dist.Normal(0., 1.))
+    mu =  pyro.sample("mu", dist.Normal(0., 100.))
+    sigma_age =  pyro.sample("sigma_age", dist.Uniform(0., 100.))
+    sigma_edu =  pyro.sample("sigma_edu", dist.Uniform(0., 100.))
+    sigma_age_edu =  pyro.sample("sigma_age_edu", dist.Uniform(0., 100.))
+    sigma_region =  pyro.sample("sigma_region", dist.Uniform(0., 100.))
+    sigma_state =  pyro.sample("sigma_state", dist.Uniform(0., 100.))
+    with pyro.iarange('beta_data', 4):
+        beta =  pyro.sample("beta", dist.Normal(0., 100.))
+    with pyro.iarange('b_age_data', n_age):
+        b_age =  pyro.sample("b_age", dist.Normal((100 * mu_age), sigma_age))
+    with pyro.iarange('b_edu_data', n_edu):
+        b_edu =  pyro.sample("b_edu", dist.Normal((100 * mu_edu), sigma_edu))
+    with pyro.iarange('b_age_edu_data', n_age_edu):
+        b_age_edu =  pyro.sample("b_age_edu", dist.Normal((100 * mu_age_edu), sigma_age_edu))
+    with pyro.iarange('region_data', n_region):
+        b_region =  pyro.sample("b_region", dist.Normal((100 * mu_region), sigma_region).expand([n_region]))
+    b_v_prev =  pyro.sample("b_v_prev", dist.Normal(0., 1.))
+    with pyro.iarange('state', n_state):
+        b_state_hat = b_region[region] + 100 * b_v_prev * v_prev
+    b_state =  pyro.sample("b_state", dist.Normal(b_state_hat, sigma_state))
+    with pyro.iarange('data', N):
+        Xbeta = beta[0] + beta[1]*female + beta[2] * black + beta[3] * female * black + \
+                b_age[age] + b_edu[edu] + b_age_edu[age_edu] + b_state[state]
+        y =  pyro.sample("y", dist.Bernoulli(logits=Xbeta), obs=y)
 
