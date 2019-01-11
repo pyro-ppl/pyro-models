@@ -47,13 +47,15 @@ def main(args):
     from pyro.infer import SVI, Trace_ELBO
     from pyro.contrib.autoguide import AutoDelta, AutoDiagonalNormal
     import pyro.optim as optim
-    module = importlib.import_module(args.fname)
+    module = importlib.import_module(args.fname[:-3])
     model = module.model
     guide = AutoDelta(model)
     svi = SVI(model, guide, optim.Adam({'lr': 0.1}), loss=Trace_ELBO())
-    data = json_file_to_mem_format(args.fname + '.py.json')
+    data = json_file_to_mem_format(args.fname + '.json')
     params = module.init_params(data)
     tensorize_data(data)
+    if hasattr(module, 'transformed_data'):
+        module.transformed_data(data)
     for i in range(args.num_epochs):
         loss = svi.step(data, params)
         print(loss)
@@ -62,6 +64,6 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="parse args")
     parser.add_argument('-n', '--num-epochs', default=10, type=int)
-    parser.add_argument('-f', '--fname', default='100_pilots_chr', type=str)
+    parser.add_argument('-f', '--fname', default='100_pilots_chr.py', type=str)
     args = parser.parse_args()
     main(args)
