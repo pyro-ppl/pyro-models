@@ -7,7 +7,6 @@ def init_vector(name, dims=None):
     return pyro.sample(name, dist.Normal(torch.zeros(dims), 0.2 * torch.ones(dims)))
 
 
-
 def validate_data_def(data):
     assert 'N' in data, 'variable not found in data: key=N'
     assert 'kid_score' in data, 'variable not found in data: key=kid_score'
@@ -19,14 +18,7 @@ def validate_data_def(data):
 
 def init_params(data):
     params = {}
-    # initialize data
-    N = data["N"]
-    kid_score = data["kid_score"]
-    mom_hs = data["mom_hs"]
-    # assign init values for parameters
-    params["beta"] = init_vector("beta", dims=(2)) # vector
-    params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
-
+    params["beta"] = init_vector("beta", dims=(3)) # vector
     return params
 
 def model(data, params):
@@ -34,13 +26,9 @@ def model(data, params):
     N = data["N"]
     kid_score = data["kid_score"]
     mom_hs = data["mom_hs"]
-    
+
     # init parameters
     beta = params["beta"]
-    sigma = params["sigma"]
-    # initialize transformed parameters
-    # model block
 
-    sigma =  _pyro_sample(sigma, "sigma", "cauchy", [0., 2.5])
-    kid_score =  _pyro_sample(kid_score, "kid_score", "normal", [_call_func("add", [_index_select(beta, 1 - 1) ,_call_func("multiply", [_index_select(beta, 2 - 1) ,mom_hs])]), sigma], obs=kid_score)
-
+    sigma =  pyro.sample("sigma", dist.Cauchy(torch.tensor(0.), torch.tensor(2.5)).expand([N])).abs()
+    kid_score = pyro.sample('obs', dist.Normal(beta[0] + beta[1] * mom_hs, sigma), obs=kid_score)
