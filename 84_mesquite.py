@@ -40,7 +40,7 @@ def init_params(data):
     group = data["group"]
     # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(7)) # vector
-    params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
+    params["sigma"] = pyro.sample("sigma", dist.Uniform(0., 100.))
 
     return params
 
@@ -54,12 +54,15 @@ def model(data, params):
     total_height = data["total_height"]
     density = data["density"]
     group = data["group"]
-    
+
     # init parameters
     beta = params["beta"]
     sigma = params["sigma"]
     # initialize transformed parameters
     # model block
 
-    weight =  _pyro_sample(weight, "weight", "normal", [_call_func("add", [_call_func("add", [_call_func("add", [_call_func("add", [_call_func("add", [_call_func("add", [_index_select(beta, 1 - 1) ,_call_func("multiply", [_index_select(beta, 2 - 1) ,diam1])]),_call_func("multiply", [_index_select(beta, 3 - 1) ,diam2])]),_call_func("multiply", [_index_select(beta, 4 - 1) ,canopy_height])]),_call_func("multiply", [_index_select(beta, 5 - 1) ,total_height])]),_call_func("multiply", [_index_select(beta, 6 - 1) ,density])]),_call_func("multiply", [_index_select(beta, 7 - 1) ,group])]), sigma], obs=weight)
+    pyro.sample('weight', dist.Normal(beta[0] + beta[1] * diam1 + beta[2] * diam2
+                                      + beta[3] * canopy_height + beta[4] * total_height
+                                      + beta[5] * density + beta[6] * group, sigma),
+                obs=weight)
 

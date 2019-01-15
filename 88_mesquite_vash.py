@@ -26,6 +26,7 @@ def validate_data_def(data):
     group = data["group"]
 
 def transformed_data(data):
+    log = torch.log
     # initialize data
     N = data["N"]
     weight = data["weight"]
@@ -34,16 +35,11 @@ def transformed_data(data):
     canopy_height = data["canopy_height"]
     total_height = data["total_height"]
     group = data["group"]
-    log_weight = init_vector("log_weight", dims=(N)) # vector
-    log_canopy_volume = init_vector("log_canopy_volume", dims=(N)) # vector
-    log_canopy_area = init_vector("log_canopy_area", dims=(N)) # vector
-    log_canopy_shape = init_vector("log_canopy_shape", dims=(N)) # vector
-    log_total_height = init_vector("log_total_height", dims=(N)) # vector
-    log_weight = _pyro_assign(log_weight, _call_func("log", [weight]))
-    log_canopy_volume = _pyro_assign(log_canopy_volume, _call_func("log", [_call_func("elt_multiply", [_call_func("elt_multiply", [diam1,diam2]),canopy_height])]))
-    log_canopy_area = _pyro_assign(log_canopy_area, _call_func("log", [_call_func("elt_multiply", [diam1,diam2])]))
-    log_canopy_shape = _pyro_assign(log_canopy_shape, _call_func("log", [_call_func("elt_divide", [diam1,diam2])]))
-    log_total_height = _pyro_assign(log_total_height, _call_func("log", [total_height]))
+    log_weight        = log(weight)
+    log_canopy_volume = log(diam1 * diam2 * canopy_height)
+    log_canopy_area   = log(diam1 * diam2)
+    log_canopy_shape  = log(diam1 / diam2)
+    log_total_height  = log(total_height)
     data["log_weight"] = log_weight
     data["log_canopy_volume"] = log_canopy_volume
     data["log_canopy_area"] = log_canopy_area
@@ -52,23 +48,9 @@ def transformed_data(data):
 
 def init_params(data):
     params = {}
-    # initialize data
-    N = data["N"]
-    weight = data["weight"]
-    diam1 = data["diam1"]
-    diam2 = data["diam2"]
-    canopy_height = data["canopy_height"]
-    total_height = data["total_height"]
-    group = data["group"]
-    # initialize transformed data
-    log_weight = data["log_weight"]
-    log_canopy_volume = data["log_canopy_volume"]
-    log_canopy_area = data["log_canopy_area"]
-    log_canopy_shape = data["log_canopy_shape"]
-    log_total_height = data["log_total_height"]
     # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(6)) # vector
-    params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
+    params["sigma"] = pyro.sample("sigma", dist.Uniform(0., 100.))
 
     return params
 
@@ -87,12 +69,14 @@ def model(data, params):
     log_canopy_area = data["log_canopy_area"]
     log_canopy_shape = data["log_canopy_shape"]
     log_total_height = data["log_total_height"]
-    
+
     # init parameters
     beta = params["beta"]
     sigma = params["sigma"]
     # initialize transformed parameters
     # model block
-
-    log_weight =  _pyro_sample(log_weight, "log_weight", "normal", [_call_func("add", [_call_func("add", [_call_func("add", [_call_func("add", [_call_func("add", [_index_select(beta, 1 - 1) ,_call_func("multiply", [_index_select(beta, 2 - 1) ,log_canopy_volume])]),_call_func("multiply", [_index_select(beta, 3 - 1) ,log_canopy_area])]),_call_func("multiply", [_index_select(beta, 4 - 1) ,log_canopy_shape])]),_call_func("multiply", [_index_select(beta, 5 - 1) ,log_total_height])]),_call_func("multiply", [_index_select(beta, 6 - 1) ,group])]), sigma], obs=log_weight)
+    pyro.sample('log_weight', dist.Normal(beta[0] + beta[1] * log_canopy_volume + beta[2] * log_canopy_area
+                                          + beta[3] * log_canopy_shape + beta[4] * log_total_height
+                                          + beta[5] * group, sigma),
+                obs=weight)
 
