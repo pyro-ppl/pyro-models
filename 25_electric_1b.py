@@ -25,17 +25,7 @@ def validate_data_def(data):
 
 def init_params(data):
     params = {}
-    # initialize data
-    N = data["N"]
-    n_pair = data["n_pair"]
-    pair = data["pair"]
-    pre_test = data["pre_test"]
-    treatment = data["treatment"]
-    y = data["y"]
     # assign init values for parameters
-    params["a"] = init_vector("a", dims=(n_pair)) # vector
-    params["beta"] = init_vector("beta", dims=(2)) # vector
-    params["mu_a"] = pyro.sample("mu_a"))
     params["sigma_a"] = pyro.sample("sigma_a", dist.Uniform(0., 100.))
     params["sigma_y"] = pyro.sample("sigma_y", dist.Uniform(0., 100.))
 
@@ -45,25 +35,18 @@ def model(data, params):
     # initialize data
     N = data["N"]
     n_pair = data["n_pair"]
-    pair = data["pair"]
+    pair = data["pair"].long() - 1
     pre_test = data["pre_test"]
     treatment = data["treatment"]
     y = data["y"]
-    
+
     # init parameters
-    a = params["a"]
-    beta = params["beta"]
-    mu_a = params["mu_a"]
     sigma_a = params["sigma_a"]
     sigma_y = params["sigma_y"]
-    # initialize transformed parameters
-    y_hat = init_vector("y_hat", dims=(N)) # vector
-    for i in range(1, to_int(N) + 1):
-        y_hat[i - 1] = _pyro_assign(y_hat[i - 1], ((_index_select(a, pair[i - 1] - 1)  + (_index_select(beta, 1 - 1)  * _index_select(treatment, i - 1) )) + (_index_select(beta, 2 - 1)  * _index_select(pre_test, i - 1) )))
+
     # model block
-
-    mu_a =  _pyro_sample(mu_a, "mu_a", "normal", [0., 1])
-    a =  _pyro_sample(a, "a", "normal", [(100 * mu_a), sigma_a])
-    beta =  _pyro_sample(beta, "beta", "normal", [0., 100])
-    y =  _pyro_sample(y, "y", "normal", [y_hat, sigma_y], obs=y)
-
+    mu_a =  pyro.sample("mu_a", dist.Normal(0., 1.))
+    a = pyro.sample('a', dist.Normal(100 * mu_a, sigma_a).expand([n_pair]))
+    beta =  pyro.sample("beta", dist.Normal(0., 100.).expand([2]))
+    y_hat = a[pair] + beta[0] * treatment + beta[1] * pre_test
+    y =  pyro.sample("y", dist.Normal(y_hat, sigma_y), obs=y)

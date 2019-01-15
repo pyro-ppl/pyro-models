@@ -25,8 +25,7 @@ def transformed_data(data):
     post_test = data["post_test"]
     treatment = data["treatment"]
     pre_test = data["pre_test"]
-    inter = init_vector("inter", dims=(N)) # vector
-    inter = _pyro_assign(inter, _call_func("elt_multiply", [treatment,pre_test]))
+    inter = treatment * pre_test
     data["inter"] = inter
 
 def init_params(data):
@@ -37,10 +36,9 @@ def init_params(data):
     treatment = data["treatment"]
     pre_test = data["pre_test"]
     # initialize transformed data
-    inter = data["inter"]
     # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(4)) # vector
-    params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
+    params["sigma"] = pyro.sample("sigma", dist.Uniform(0., 100.))
 
     return params
 
@@ -52,12 +50,12 @@ def model(data, params):
     pre_test = data["pre_test"]
     # initialize transformed data
     inter = data["inter"]
-    
+
     # init parameters
     beta = params["beta"]
     sigma = params["sigma"]
     # initialize transformed parameters
     # model block
 
-    post_test =  _pyro_sample(post_test, "post_test", "normal", [_call_func("add", [_call_func("add", [_call_func("add", [_index_select(beta, 1 - 1) ,_call_func("multiply", [_index_select(beta, 2 - 1) ,treatment])]),_call_func("multiply", [_index_select(beta, 3 - 1) ,pre_test])]),_call_func("multiply", [_index_select(beta, 4 - 1) ,inter])]), sigma], obs=post_test)
+    pyro.sample('post_test', dist.Normal(beta[0] + beta[1] * treatment + beta[2] * pre_test + beta[3] * inter, sigma), obs=post_test)
 

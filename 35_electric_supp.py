@@ -28,7 +28,7 @@ def init_params(data):
     pre_test = data["pre_test"]
     # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(3)) # vector
-    params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
+    params["sigma"] = pyro.sample("sigma", dist.Uniform(0., 100.))
 
     return params
 
@@ -38,12 +38,11 @@ def model(data, params):
     post_test = data["post_test"]
     supp = data["supp"]
     pre_test = data["pre_test"]
-    
+
     # init parameters
     beta = params["beta"]
     sigma = params["sigma"]
     # initialize transformed parameters
     # model block
 
-    post_test =  _pyro_sample(post_test, "post_test", "normal", [_call_func("add", [_call_func("add", [_index_select(beta, 1 - 1) ,_call_func("multiply", [_index_select(beta, 2 - 1) ,supp])]),_call_func("multiply", [_index_select(beta, 3 - 1) ,pre_test])]), sigma], obs=post_test)
-
+    pyro.sample('post_test', dist.Normal(beta[0] + beta[1] * supp + beta[2] * pre_test, sigma), obs=post_test)
