@@ -23,23 +23,18 @@ def validate_data_def(data):
 
 def transformed_data(data):
     # initialize data
+    mean = torch.mean
     N = data["N"]
     switched = data["switched"]
     dist = data["dist"]
     arsenic = data["arsenic"]
     educ = data["educ"]
-    c_dist100 = init_vector("c_dist100", dims=(N)) # vector
-    c_arsenic = init_vector("c_arsenic", dims=(N)) # vector
-    c_educ4 = init_vector("c_educ4", dims=(N)) # vector
-    da_inter = init_vector("da_inter", dims=(N)) # vector
-    de_inter = init_vector("de_inter", dims=(N)) # vector
-    ae_inter = init_vector("ae_inter", dims=(N)) # vector
-    c_dist100 = _pyro_assign(c_dist100., _call_func("divide", [_call_func("subtract", [dist,_call_func("mean", [dist])]),100.0]))
-    c_arsenic = _pyro_assign(c_arsenic, _call_func("subtract", [arsenic,_call_func("mean", [arsenic])]))
-    c_educ4 = _pyro_assign(c_educ4, _call_func("divide", [_call_func("subtract", [educ,_call_func("mean", [educ])]),4.0]))
-    da_inter = _pyro_assign(da_inter, _call_func("elt_multiply", [c_dist100.,c_arsenic]))
-    de_inter = _pyro_assign(de_inter, _call_func("elt_multiply", [c_dist100.,c_educ4]))
-    ae_inter = _pyro_assign(ae_inter, _call_func("elt_multiply", [c_arsenic,c_educ4]))
+    c_dist100 = (dist - mean(dist)) / 100.0;
+    c_arsenic = arsenic - mean(arsenic);
+    c_educ4   = (educ - mean(educ)) / 4.0;
+    da_inter  = c_dist100 * c_arsenic;
+    de_inter  = c_dist100 * c_educ4;
+    ae_inter  = c_arsenic * c_educ4;
     data["c_dist100"] = c_dist100
     data["c_arsenic"] = c_arsenic
     data["c_educ4"] = c_educ4
@@ -49,19 +44,6 @@ def transformed_data(data):
 
 def init_params(data):
     params = {}
-    # initialize data
-    N = data["N"]
-    switched = data["switched"]
-    dist = data["dist"]
-    arsenic = data["arsenic"]
-    educ = data["educ"]
-    # initialize transformed data
-    c_dist100 = data["c_dist100"]
-    c_arsenic = data["c_arsenic"]
-    c_educ4 = data["c_educ4"]
-    da_inter = data["da_inter"]
-    de_inter = data["de_inter"]
-    ae_inter = data["ae_inter"]
     # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(7)) # vector
 
@@ -71,7 +53,6 @@ def model(data, params):
     # initialize data
     N = data["N"]
     switched = data["switched"]
-    dist = data["dist"]
     arsenic = data["arsenic"]
     educ = data["educ"]
     # initialize transformed data
@@ -81,11 +62,13 @@ def model(data, params):
     da_inter = data["da_inter"]
     de_inter = data["de_inter"]
     ae_inter = data["ae_inter"]
-    
+
     # init parameters
     beta = params["beta"]
     # initialize transformed parameters
     # model block
 
-    switched =  _pyro_sample(switched, "switched", "bernoulli_logit", [_call_func("add", [_call_func("add", [_call_func("add", [_call_func("add", [_call_func("add", [_call_func("add", [_index_select(beta, 1 - 1) ,_call_func("multiply", [_index_select(beta, 2 - 1) ,c_dist100])]),_call_func("multiply", [_index_select(beta, 3 - 1) ,c_arsenic])]),_call_func("multiply", [_index_select(beta, 4 - 1) ,c_educ4])]),_call_func("multiply", [_index_select(beta, 5 - 1) ,da_inter])]),_call_func("multiply", [_index_select(beta, 6 - 1) ,de_inter])]),_call_func("multiply", [_index_select(beta, 7 - 1) ,ae_inter])])], obs=switched)
+    switched = pyro.sample('switched', dist.Bernoulli(logits=beta[0] + beta[1] * c_dist100 + \
+                    beta[2] * c_arsenic + beta[3] * c_educ4 + beta[4] * da_inter + beta[5] * \
+                    de_inter + beta[6] * ae_inter), obs=switched)
 
