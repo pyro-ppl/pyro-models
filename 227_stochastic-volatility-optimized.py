@@ -21,10 +21,7 @@ def init_params(data):
     T = data["T"]
     y = data["y"]
     # assign init values for parameters
-    params["mu"] = pyro.sample("mu"))
     params["phi"] = pyro.sample("phi", dist.Uniform(-(1), 1))
-    params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
-    params["h_std"] = init_vector("h_std", dims=(T)) # vector
 
     return params
 
@@ -32,23 +29,21 @@ def model(data, params):
     # initialize data
     T = data["T"]
     y = data["y"]
-    
+
     # init parameters
-    mu = params["mu"]
     phi = params["phi"]
-    sigma = params["sigma"]
-    h_std = params["h_std"]
     # initialize transformed parameters
     h = init_vector("h", dims=(T)) # vector
-    h = _pyro_assign(h, _call_func("multiply", [h_std,sigma]))
-    h[1 - 1] = _pyro_assign(h[1 - 1], (_index_select(h, 1 - 1)  / _call_func("sqrt", [(1 - (phi * phi))])))
-    h = _pyro_assign(h, _call_func("add", [h,mu]))
-    for t in range(2, to_int(T) + 1):
-        h[t - 1] = _pyro_assign(h[t - 1], (_index_select(h, t - 1)  + (phi * (_index_select(h, (t - 1) - 1)  - mu))))
     # model block
 
-    sigma =  _pyro_sample(sigma, "sigma", "cauchy", [0., 5])
-    mu =  _pyro_sample(mu, "mu", "cauchy", [0., 10])
-    h_std =  _pyro_sample(h_std, "h_std", "normal", [0., 1])
-    y =  _pyro_sample(y, "y", "normal", [0., _call_func("exp", [_call_func("divide", [h,2])])], obs=y)
+    sigma =  pyro.sample("sigma", dist.HalfCauchy(5.))
+    mu =  pyro.sample("mu", dist.Cauchy(0., 10.))
+    h_std =  pyro.sample("h_std", dist.Normal(0., 1.).expand([T]))
+    with torch.no_grad():
+        h = h_std * sigma
+        h[0] = h[0] / torch.sqrt(1. - phi * phi)
+        h = h + mu
+        for t in range(1, T):
+            h[t] = h[t] + phi * (h[t-1] - mu);
+    y = pyro.sample(y, dist.Normal(0., (h / 2.).exp()), obs=y)
 
