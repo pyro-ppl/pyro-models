@@ -22,39 +22,26 @@ def transformed_data(data):
     N = data["N"]
     earn = data["earn"]
     height = data["height"]
-    log10_earn = init_vector("log10_earn", dims=(N)) # vector
-    for i in range(1, to_int(N) + 1):
-
-        log10_earn[i - 1] = _pyro_assign(log10_earn[i - 1], _call_func("log10", [_index_select(earn, i - 1) ]))
+    log10_earn = torch.log10(earn)
     data["log10_earn"] = log10_earn
 
 def init_params(data):
     params = {}
-    # initialize data
-    N = data["N"]
-    earn = data["earn"]
-    height = data["height"]
-    # initialize transformed data
-    log10_earn = data["log10_earn"]
-    # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(2)) # vector
-    params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
-
     return params
 
 def model(data, params):
     # initialize data
     N = data["N"]
-    earn = data["earn"]
     height = data["height"]
     # initialize transformed data
     log10_earn = data["log10_earn"]
-    
+
     # init parameters
     beta = params["beta"]
-    sigma = params["sigma"]
     # initialize transformed parameters
     # model block
 
-    log10_earn =  _pyro_sample(log10_earn, "log10_earn", "normal", [_call_func("add", [_index_select(beta, 1 - 1) ,_call_func("multiply", [_index_select(beta, 2 - 1) ,height])]), sigma], obs=log10_earn)
+    sigma =  pyro.sample("sigma", dist.Cauchy(torch.tensor(0.), torch.tensor(2.5)).expand([N])).abs()
+    log10_earn = pyro.sample('obs', dist.Normal(beta[0] + beta[1] * height, sigma), obs=log10_earn)
 

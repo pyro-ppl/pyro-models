@@ -25,30 +25,16 @@ def transformed_data(data):
     kid_score = data["kid_score"]
     mom_hs = data["mom_hs"]
     mom_iq = data["mom_iq"]
-    z_mom_hs = init_vector("z_mom_hs", dims=(N)) # vector
-    z_mom_iq = init_vector("z_mom_iq", dims=(N)) # vector
-    inter = init_vector("inter", dims=(N)) # vector
-    z_mom_hs = _pyro_assign(z_mom_hs, _call_func("divide", [_call_func("subtract", [mom_hs,_call_func("mean", [mom_hs])]),(2 * _call_func("sd", [mom_hs]))]))
-    z_mom_iq = _pyro_assign(z_mom_iq, _call_func("divide", [_call_func("subtract", [mom_iq,_call_func("mean", [mom_iq])]),(2 * _call_func("sd", [mom_iq]))]))
-    inter = _pyro_assign(inter, _call_func("elt_multiply", [z_mom_hs,z_mom_iq]))
+    z_mom_hs = (mom_hs - torch.mean(mom_hs)) / (2 * torch.std(mom_hs));
+    z_mom_iq = (mom_iq - torch.mean(mom_iq)) / (2 * torch.std(mom_iq));
+    inter    = z_mom_hs * z_mom_iq;
     data["z_mom_hs"] = z_mom_hs
     data["z_mom_iq"] = z_mom_iq
     data["inter"] = inter
 
 def init_params(data):
     params = {}
-    # initialize data
-    N = data["N"]
-    kid_score = data["kid_score"]
-    mom_hs = data["mom_hs"]
-    mom_iq = data["mom_iq"]
-    # initialize transformed data
-    z_mom_hs = data["z_mom_hs"]
-    z_mom_iq = data["z_mom_iq"]
-    inter = data["inter"]
-    # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(4)) # vector
-    params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
 
     return params
 
@@ -62,12 +48,9 @@ def model(data, params):
     z_mom_hs = data["z_mom_hs"]
     z_mom_iq = data["z_mom_iq"]
     inter = data["inter"]
-    
+
     # init parameters
     beta = params["beta"]
-    sigma = params["sigma"]
-    # initialize transformed parameters
-    # model block
+    sigma =  pyro.sample("sigma", dist.Cauchy(torch.tensor(0.), torch.tensor(2.5)).expand([N])).abs()
 
-    kid_score =  _pyro_sample(kid_score, "kid_score", "normal", [_call_func("add", [_call_func("add", [_call_func("add", [_index_select(beta, 1 - 1) ,_call_func("multiply", [_index_select(beta, 2 - 1) ,z_mom_hs])]),_call_func("multiply", [_index_select(beta, 3 - 1) ,z_mom_iq])]),_call_func("multiply", [_index_select(beta, 4 - 1) ,inter])]), sigma], obs=kid_score)
-
+    kid_score = pyro.sample('obs', dist.Normal(beta[0] + beta[1] * z_mom_hs + beta[2] * z_mom_iq + beta[3] * inter, sigma), obs=kid_score)

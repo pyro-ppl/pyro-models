@@ -25,30 +25,17 @@ def transformed_data(data):
     kid_score = data["kid_score"]
     mom_hs = data["mom_hs"]
     mom_iq = data["mom_iq"]
-    c2_mom_hs = init_vector("c2_mom_hs", dims=(N)) # vector
-    c2_mom_iq = init_vector("c2_mom_iq", dims=(N)) # vector
-    inter = init_vector("inter", dims=(N)) # vector
-    c2_mom_hs = _pyro_assign(c2_mom_hs, _call_func("subtract", [mom_hs,0.5]))
-    c2_mom_iq = _pyro_assign(c2_mom_iq, _call_func("subtract", [mom_iq,100]))
-    inter = _pyro_assign(inter, _call_func("elt_multiply", [c2_mom_hs,c2_mom_iq]))
+    c2_mom_hs = mom_hs - 0.5;
+    c2_mom_iq = mom_iq - 100;
+    inter     = c2_mom_hs * c2_mom_iq;
     data["c2_mom_hs"] = c2_mom_hs
     data["c2_mom_iq"] = c2_mom_iq
     data["inter"] = inter
 
 def init_params(data):
     params = {}
-    # initialize data
-    N = data["N"]
-    kid_score = data["kid_score"]
-    mom_hs = data["mom_hs"]
-    mom_iq = data["mom_iq"]
-    # initialize transformed data
-    c2_mom_hs = data["c2_mom_hs"]
-    c2_mom_iq = data["c2_mom_iq"]
-    inter = data["inter"]
     # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(4)) # vector
-    params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
 
     return params
 
@@ -62,12 +49,9 @@ def model(data, params):
     c2_mom_hs = data["c2_mom_hs"]
     c2_mom_iq = data["c2_mom_iq"]
     inter = data["inter"]
-    
+
     # init parameters
     beta = params["beta"]
-    sigma = params["sigma"]
     # initialize transformed parameters
-    # model block
-
-    kid_score =  _pyro_sample(kid_score, "kid_score", "normal", [_call_func("add", [_call_func("add", [_call_func("add", [_index_select(beta, 1 - 1) ,_call_func("multiply", [_index_select(beta, 2 - 1) ,c2_mom_hs])]),_call_func("multiply", [_index_select(beta, 3 - 1) ,c2_mom_iq])]),_call_func("multiply", [_index_select(beta, 4 - 1) ,inter])]), sigma], obs=kid_score)
-
+    sigma =  pyro.sample("sigma", dist.Cauchy(torch.tensor(0.), torch.tensor(2.5)).expand([N])).abs()
+    kid_score = pyro.sample('obs', dist.Normal(beta[0] + beta[1] * c2_mom_hs + beta[2] * c2_mom_iq + beta[3] * inter, sigma), obs=kid_score)
