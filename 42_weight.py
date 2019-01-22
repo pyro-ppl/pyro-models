@@ -22,8 +22,7 @@ def transformed_data(data):
     N = data["N"]
     weight = data["weight"]
     height = data["height"]
-    c_height = init_vector("c_height", dims=(N)) # vector
-    c_height = _pyro_assign(c_height, _call_func("subtract", [height,_call_func("mean", [height])]))
+    c_height = height - height.mean(0)
     data["c_height"] = c_height
 
 def init_params(data):
@@ -32,12 +31,10 @@ def init_params(data):
     N = data["N"]
     weight = data["weight"]
     height = data["height"]
-    # initialize transformed data
-    c_height = data["c_height"]
     # assign init values for parameters
-    params["a"] = pyro.sample("a"))
-    params["b"] = pyro.sample("b"))
-    params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
+    params["a"] = pyro.sample("a", dist.Uniform(0., 100.))
+    params["b"] = pyro.sample("b", dist.Uniform(0., 100.))
+    params["sigma"] = pyro.sample("sigma", dist.Uniform(0., 100.))
 
     return params
 
@@ -48,13 +45,12 @@ def model(data, params):
     height = data["height"]
     # initialize transformed data
     c_height = data["c_height"]
-    
+
     # init parameters
     a = params["a"]
     b = params["b"]
     sigma = params["sigma"]
     # initialize transformed parameters
+
     # model block
-
-    weight =  _pyro_sample(weight, "weight", "normal", [_call_func("add", [a,_call_func("multiply", [b,c_height])]), sigma], obs=weight)
-
+    weight = pyro.sample('weight', dist.Normal(a + b * c_height, sigma), obs=weight)

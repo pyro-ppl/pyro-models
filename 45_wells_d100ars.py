@@ -16,28 +16,20 @@ def validate_data_def(data):
     # initialize data
     N = data["N"]
     switched = data["switched"]
-    dist = data["dist"]
+    dist_ = data["dist"]
     arsenic = data["arsenic"]
 
 def transformed_data(data):
     # initialize data
     N = data["N"]
     switched = data["switched"]
-    dist = data["dist"]
+    dist_ = data["dist"]
     arsenic = data["arsenic"]
-    dist100 = init_vector("dist100", dims=(N)) # vector
-    dist100 = _pyro_assign(dist100., _call_func("divide", [dist,100.0]))
+    dist100 = dist_ / 100.
     data["dist100"] = dist100
 
 def init_params(data):
     params = {}
-    # initialize data
-    N = data["N"]
-    switched = data["switched"]
-    dist = data["dist"]
-    arsenic = data["arsenic"]
-    # initialize transformed data
-    dist100 = data["dist100"]
     # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(3)) # vector
 
@@ -47,15 +39,14 @@ def model(data, params):
     # initialize data
     N = data["N"]
     switched = data["switched"]
-    dist = data["dist"]
+    dist_ = data["dist"]
     arsenic = data["arsenic"]
     # initialize transformed data
     dist100 = data["dist100"]
-    
+
     # init parameters
     beta = params["beta"]
     # initialize transformed parameters
     # model block
-
-    switched =  _pyro_sample(switched, "switched", "bernoulli_logit", [_call_func("add", [_call_func("add", [_index_select(beta, 1 - 1) ,_call_func("multiply", [_index_select(beta, 2 - 1) ,dist100])]),_call_func("multiply", [_index_select(beta, 3 - 1) ,arsenic])])], obs=switched)
+    switched = pyro.sample('switched', dist.Bernoulli(logits=beta[0] + beta[1] * dist100 + beta[2] * arsenic), obs=switched)
 

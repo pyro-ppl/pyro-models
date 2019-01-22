@@ -33,11 +33,9 @@ def model(data, params):
     N = data["N"]
     y = data["y"]
     x = data["x"]
-    
+
     # init parameters
     beta = params["beta"]
-    # initialize transformed parameters
     # model block
-
-    y =  _pyro_sample(y, "y", "bernoulli_logit", [_call_func("add", [_index_select(beta, 1 - 1) ,_call_func("multiply", [_index_select(beta, 2 - 1) ,x])])], obs=y)
+    y = pyro.sample('y', dist.Bernoulli(logits=beta[0] + beta[1] * x), obs=y)
 
