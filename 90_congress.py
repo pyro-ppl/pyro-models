@@ -6,8 +6,6 @@ import pyro.distributions as dist
 def init_vector(name, dims=None):
     return pyro.sample(name, dist.Normal(torch.zeros(dims), 0.2 * torch.ones(dims)))
 
-
-
 def validate_data_def(data):
     assert 'N' in data, 'variable not found in data: key=N'
     assert 'incumbency_88' in data, 'variable not found in data: key=incumbency_88'
@@ -21,15 +19,7 @@ def validate_data_def(data):
 
 def init_params(data):
     params = {}
-    # initialize data
-    N = data["N"]
-    incumbency_88 = data["incumbency_88"]
-    vote_86 = data["vote_86"]
-    vote_88 = data["vote_88"]
-    # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(3)) # vector
-    params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
-
     return params
 
 def model(data, params):
@@ -38,12 +28,12 @@ def model(data, params):
     incumbency_88 = data["incumbency_88"]
     vote_86 = data["vote_86"]
     vote_88 = data["vote_88"]
-    
+
     # init parameters
     beta = params["beta"]
-    sigma = params["sigma"]
     # initialize transformed parameters
     # model block
 
-    vote_88 =  _pyro_sample(vote_88, "vote_88", "normal", [_call_func("add", [_call_func("add", [_index_select(beta, 1 - 1) ,_call_func("multiply", [_index_select(beta, 2 - 1) ,vote_86])]),_call_func("multiply", [_index_select(beta, 3 - 1) ,incumbency_88])]), sigma], obs=vote_88)
+    sigma =  pyro.sample("sigma", dist.Cauchy(torch.tensor(0.), torch.tensor(2.5)).expand([N])).abs()
+    vote_88 = pyro.sample('vote_88', dist.Normal(beta[0] + beta[1] * vote_86 + beta[2] * incumbency_88, sigma), obs=vote_88)
 

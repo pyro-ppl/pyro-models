@@ -19,25 +19,19 @@ def validate_data_def(data):
 
 def init_params(data):
     params = {}
-    # initialize data
-    N = data["N"]
-    dist = data["dist"]
-    switc = data["switc"]
     # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(2)) # vector
-
     return params
 
 def model(data, params):
     # initialize data
     N = data["N"]
-    dist = data["dist"]
+    dist_ = data["dist"]
     switc = data["switc"]
-    
+
     # init parameters
     beta = params["beta"]
     # initialize transformed parameters
     # model block
-
-    switc =  _pyro_sample(switc, "switc", "bernoulli_logit", [_call_func("add", [_index_select(beta, 1 - 1) ,_call_func("divide", [_call_func("multiply", [_index_select(beta, 2 - 1) ,dist]),100])])], obs=switc)
+    switc= pyro.sample('switc', dist.Bernoulli(logits=beta[0] + beta[1] * dist_), obs=switc)
 
