@@ -23,15 +23,9 @@ def validate_data_def(data):
 
 def init_params(data):
     params = {}
-    # initialize data
-    N = data["N"]
-    party = data["party"]
-    score1 = data["score1"]
-    z1 = data["z1"]
-    z2 = data["z2"]
     # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(4)) # vector
-    params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
+    params["sigma"] = pyro.sample("sigma", dist.Uniform(0., 100.))
 
     return params
 
@@ -42,12 +36,11 @@ def model(data, params):
     score1 = data["score1"]
     z1 = data["z1"]
     z2 = data["z2"]
-    
+
     # init parameters
     beta = params["beta"]
     sigma = params["sigma"]
     # initialize transformed parameters
     # model block
 
-    score1 =  _pyro_sample(score1, "score1", "normal", [_call_func("add", [_call_func("add", [_call_func("add", [_index_select(beta, 1 - 1) ,_call_func("multiply", [_index_select(beta, 2 - 1) ,party])]),_call_func("multiply", [_index_select(beta, 3 - 1) ,z1])]),_call_func("multiply", [_index_select(beta, 4 - 1) ,z2])]), sigma], obs=score1)
-
+    score1 = pyro.sample('score1', dist.Normal(beta[0] + beta[1] * party + beta[2] * z1 + beta[3] * z2, sigma), obs=score1)

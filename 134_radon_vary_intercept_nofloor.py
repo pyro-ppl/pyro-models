@@ -31,8 +31,6 @@ def init_params(data):
     y = data["y"]
     # assign init values for parameters
     params["a"] = init_vector("a", dims=(J)) # vector
-    params["b"] = pyro.sample("b"))
-    params["mu_a"] = pyro.sample("mu_a"))
     params["sigma_a"] = pyro.sample("sigma_a", dist.Uniform(0., 100.))
     params["sigma_y"] = pyro.sample("sigma_y", dist.Uniform(0., 100.))
 
@@ -42,24 +40,17 @@ def model(data, params):
     # initialize data
     J = data["J"]
     N = data["N"]
-    county = data["county"]
+    county = data["county"].long() - 1
     u = data["u"]
     y = data["y"]
-    
+
     # init parameters
-    a = params["a"]
-    b = params["b"]
-    mu_a = params["mu_a"]
     sigma_a = params["sigma_a"]
     sigma_y = params["sigma_y"]
-    # initialize transformed parameters
-    y_hat = init_vector("y_hat", dims=(N)) # vector
-    for i in range(1, to_int(N) + 1):
-        y_hat[i - 1] = _pyro_assign(y_hat[i - 1], (_index_select(a, county[i - 1] - 1)  + ((_index_select(u, i - 1)  * b) * 0.10000000000000001)))
+
     # model block
-
-    mu_a =  _pyro_sample(mu_a, "mu_a", "normal", [0., 1])
-    a =  _pyro_sample(a, "a", "normal", [mu_a, sigma_a])
-    b =  _pyro_sample(b, "b", "normal", [0., 1])
-    y =  _pyro_sample(y, "y", "normal", [y_hat, sigma_y], obs=y)
-
+    mu_a =  pyro.sample("mu_a", dist.Normal(0., 1))
+    a =  pyro.sample("a", dist.Normal(mu_a, sigma_a).expand([J]))
+    b =  pyro.sample("b", dist.Normal(0., 1))
+    y_hat = a[county] + u * b * 0.1
+    y =  pyro.sample("y", dist.Normal(y_hat, sigma_y), obs=y)

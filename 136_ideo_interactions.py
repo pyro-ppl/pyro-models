@@ -25,8 +25,7 @@ def transformed_data(data):
     party = data["party"]
     score1 = data["score1"]
     x = data["x"]
-    inter = init_vector("inter", dims=(N)) # vector
-    inter = _pyro_assign(inter, _call_func("elt_multiply", [party,x]))
+    inter = party * x
     data["inter"] = inter
 
 def init_params(data):
@@ -37,10 +36,9 @@ def init_params(data):
     score1 = data["score1"]
     x = data["x"]
     # initialize transformed data
-    inter = data["inter"]
     # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(4)) # vector
-    params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
+    params["sigma"] = pyro.sample("sigma", dist.Uniform(0., 100.))
 
     return params
 
@@ -52,12 +50,11 @@ def model(data, params):
     x = data["x"]
     # initialize transformed data
     inter = data["inter"]
-    
+
     # init parameters
     beta = params["beta"]
     sigma = params["sigma"]
     # initialize transformed parameters
     # model block
-
-    score1 =  _pyro_sample(score1, "score1", "normal", [_call_func("add", [_call_func("add", [_call_func("add", [_index_select(beta, 1 - 1) ,_call_func("multiply", [_index_select(beta, 2 - 1) ,party])]),_call_func("multiply", [_index_select(beta, 3 - 1) ,x])]),_call_func("multiply", [_index_select(beta, 4 - 1) ,inter])]), sigma], obs=score1)
+    score1 = pyro.sample('score1', dist.Normal(beta[0] + beta[1] * party + beta[2] * x + beta[3] * inter, sigma), obs=score1)
 
