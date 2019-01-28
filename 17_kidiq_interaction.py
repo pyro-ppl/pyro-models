@@ -4,8 +4,7 @@ import pyro
 import pyro.distributions as dist
 
 def init_vector(name, dims=None):
-    return pyro.sample(name, dist.Normal(torch.zeros(dims), 0.2 * torch.ones(dims)))
-
+    return pyro.sample(name, dist.Normal(torch.zeros(dims), 0.2 * torch.ones(dims)).to_event(1))
 
 
 def validate_data_def(data):
@@ -46,6 +45,7 @@ def model(data, params):
     # initialize transformed parameters
     # model block
 
-    sigma =  pyro.sample("sigma", dist.Cauchy(torch.tensor(0.), torch.tensor(2.5)).expand([N])).abs()
-    kid_score = pyro.sample('obs', dist.Normal(beta[0] + beta[1] * mom_hs + beta[2] * mom_iq + beta[3] * inter, sigma), obs=kid_score)
+    with pyro.plate("data", N):
+        sigma =  pyro.sample("sigma", dist.HalfCauchy(torch.tensor(2.5)))
+        kid_score = pyro.sample('obs', dist.Normal(beta[0] + beta[1] * mom_hs + beta[2] * mom_iq + beta[3] * inter, sigma), obs=kid_score)
 
