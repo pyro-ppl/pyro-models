@@ -25,26 +25,15 @@ def transformed_data(data):
     earn = data["earn"]
     height = data["height"]
     male = data["male"]
-    log_earn = init_vector("log_earn", dims=(N)) # vector
-    inter = init_vector("inter", dims=(N)) # vector
-    log_earn = _pyro_assign(log_earn, _call_func("log", [earn]))
-    inter = _pyro_assign(inter, _call_func("elt_multiply", [height,male]))
+    log_earn = torch.log(earn);
+    inter    = height * male;
     data["log_earn"] = log_earn
     data["inter"] = inter
 
 def init_params(data):
     params = {}
-    # initialize data
-    N = data["N"]
-    earn = data["earn"]
-    height = data["height"]
-    male = data["male"]
-    # initialize transformed data
-    log_earn = data["log_earn"]
-    inter = data["inter"]
     # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(4)) # vector
-    params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
 
     return params
 
@@ -57,12 +46,10 @@ def model(data, params):
     # initialize transformed data
     log_earn = data["log_earn"]
     inter = data["inter"]
-    
+
     # init parameters
     beta = params["beta"]
-    sigma = params["sigma"]
-    # initialize transformed parameters
-    # model block
+    sigma =  pyro.sample("sigma", dist.Cauchy(torch.tensor(0.), torch.tensor(2.5)).expand([N])).abs()
+    log_earn = pyro.sample('obs', dist.Normal(beta[0] + beta[1] * height + beta[2] * male + beta[3] * inter, sigma), obs=log_earn)
 
-    log_earn =  _pyro_sample(log_earn, "log_earn", "normal", [_call_func("add", [_call_func("add", [_call_func("add", [_index_select(beta, 1 - 1) ,_call_func("multiply", [_index_select(beta, 2 - 1) ,height])]),_call_func("multiply", [_index_select(beta, 3 - 1) ,male])]),_call_func("multiply", [_index_select(beta, 4 - 1) ,inter])]), sigma], obs=log_earn)
 
