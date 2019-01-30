@@ -44,4 +44,5 @@ def model(data, params):
     # initialize transformed parameters
     # model block
 
-    pyro.sample('switched', dist.Bernoulli(logits=beta[0] + beta[1] * dist100), obs=switched)
+    with pyro.plate("data", N):
+        pyro.sample('switched', dist.Bernoulli(logits=beta[0] + beta[1] * dist100), obs=switched)

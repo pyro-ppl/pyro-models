@@ -82,7 +82,8 @@ def model(data, params):
     # initialize transformed parameters
     # model block
 
-    pyro.sample('log_weight', dist.Normal(beta[0] + beta[1] * log_diam1 + beta[2] * log_diam2
-                                      + beta[3] * log_canopy_height + beta[4] * log_total_height
-                                      + beta[5] * log_density + beta[6] * group, sigma),
-                obs=log_weight)
+    with pyro.plate("data", N):
+        pyro.sample('log_weight', dist.Normal(beta[0] + beta[1] * log_diam1 + beta[2] * log_diam2
+                                          + beta[3] * log_canopy_height + beta[4] * log_total_height
+                                          + beta[5] * log_density + beta[6] * group, sigma),
+                    obs=log_weight)

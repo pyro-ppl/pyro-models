@@ -37,5 +37,6 @@ def model(data, params):
     # init parameters
     beta = params["beta"]
     # model block
-    y = pyro.sample('y', dist.Bernoulli(logits=beta[0] + beta[1] * x), obs=y)
+    with pyro.plate("data", N):
+        y = pyro.sample('y', dist.Bernoulli(logits=beta[0] + beta[1] * x), obs=y)
 

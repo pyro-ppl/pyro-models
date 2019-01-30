@@ -34,6 +34,7 @@ def model(data, params):
     # initialize transformed parameters
     # model block
 
-    sigma =  pyro.sample("sigma", dist.Cauchy(torch.tensor(0.), torch.tensor(2.5)).expand([N])).abs()
-    vote_88 = pyro.sample('vote_88', dist.Normal(beta[0] + beta[1] * vote_86 + beta[2] * incumbency_88, sigma), obs=vote_88)
+    with pyro.plate("data", N):
+        sigma =  pyro.sample("sigma", dist.HalfCauchy(torch.tensor(2.5)))
+        vote_88 = pyro.sample('vote_88', dist.Normal(beta[0] + beta[1] * vote_86 + beta[2] * incumbency_88, sigma), obs=vote_88)
 

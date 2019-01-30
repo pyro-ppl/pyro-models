@@ -56,7 +56,10 @@ def model(data, params):
     sigma_y = params["sigma_y"]
 
     # model block
-    gamma =  pyro.sample("gamma", dist.Normal(0., sigma_gamma).expand([n_groups]))
-    delta =  pyro.sample("delta", dist.Normal(0., sigma_delta).expand([n_scenarios]))
-    y_hat = mu + gamma[group_id] + delta[scenario_id]
-    y =  pyro.sample("y", dist.Normal(y_hat, sigma_y), obs=y)
+    with pyro.plate('n_groups', n_groups):
+        gamma =  pyro.sample("gamma", dist.Normal(0., sigma_gamma))
+    with pyro.plate('n_scenarios', n_scenarios):
+        delta =  pyro.sample("delta", dist.Normal(0., sigma_delta))
+    with pyro.plate('data', N):
+        y_hat = mu + gamma[group_id] + delta[scenario_id]
+        y =  pyro.sample("y", dist.Normal(y_hat, sigma_y), obs=y)

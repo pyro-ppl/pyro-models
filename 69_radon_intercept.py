@@ -31,9 +31,11 @@ def model(data, params):
     y = data["y"]
 
     # initialize transformed parameters
-    mu_a =  pyro.sample("mu_a", dist.Normal(0., 1.).expand([J]))
     sigma_y =  pyro.sample("sigma", dist.HalfCauchy(2.5))
-    sigma_a =  pyro.sample("sigma_b", dist.HalfCauchy(2.5).expand([J]))
-    a =  pyro.sample("a", dist.Normal(mu_a, sigma_a))
-    y_hat = a[county]
-    y = pyro.sample('y', dist.Normal(y_hat, sigma_y), obs=y)
+    with pyro.plate("J", J):
+        mu_a =  pyro.sample("mu_a", dist.Normal(0., 1.))
+        sigma_a =  pyro.sample("sigma_b", dist.HalfCauchy(2.5))
+        a =  pyro.sample("a", dist.Normal(mu_a, sigma_a))
+    with pyro.plate("data", N):
+        y_hat = a[county]
+        y = pyro.sample('y', dist.Normal(y_hat, sigma_y), obs=y)

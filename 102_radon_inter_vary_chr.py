@@ -44,13 +44,16 @@ def model(data, params):
     sigma_a2 = params["sigma_a2"]
     sigma_y = params["sigma_y"]
 
-    beta =  pyro.sample("beta", dist.Normal(0., 100.).expand([2]))
-    mu_a1 =  pyro.sample("mu_a1", dist.Normal(0., 1.))
-    mu_a2 =  pyro.sample("mu_a2", dist.Normal(0., 1.))
-    eta1 =  pyro.sample("eta1", dist.Normal(0., 1.).expand([85]))
-    eta2 =  pyro.sample("eta2", dist.Normal(0., 1.).expand([85]))
-    a1 = mu_a1 + sigma_a1 * eta1
-    a2 = 0.1 * mu_a2 + sigma_a2 * eta2;
-    y_hat = a1[county] + x * a2[county] + beta[0] * u + beta[1] * inter
-    y =  pyro.sample("y", dist.Normal(y_hat, sigma_y), obs=y)
+    with pyro.plate("beta_plate", 2):
+        beta =  pyro.sample("beta", dist.Normal(0., 100.))
+    with pyro.plate("eta", 85):
+        mu_a1 =  pyro.sample("mu_a1", dist.Normal(0., 1.))
+        mu_a2 =  pyro.sample("mu_a2", dist.Normal(0., 1.))
+        eta1 =  pyro.sample("eta1", dist.Normal(0., 1.))
+        eta2 =  pyro.sample("eta2", dist.Normal(0., 1.))
+        a1 = mu_a1 + sigma_a1 * eta1
+        a2 = 0.1 * mu_a2 + sigma_a2 * eta2;
+    with pyro.plate("data", N):
+        y_hat = a1[county] + x * a2[county] + beta[0] * u + beta[1] * inter
+        y =  pyro.sample("y", dist.Normal(y_hat, sigma_y), obs=y)
 

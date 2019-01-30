@@ -38,8 +38,10 @@ def model(data, params):
     mu_a =  pyro.sample("mu_a", dist.Normal(0., 1.))
     sigma_a =  pyro.sample("sigma_a", dist.Uniform(0., 100))
     sigma_y =  pyro.sample("sigma_y", dist.Uniform(0., 100))
-    a =  pyro.sample("a", dist.Normal((100 * mu_a), sigma_a).expand([n_pair]))
+    with pyro.plate('n_pair', n_pair):
+        a =  pyro.sample("a", dist.Normal((100 * mu_a), sigma_a).expand([n_pair]))
     beta =  pyro.sample("beta", dist.Normal(0., 1))
-    y_hat = a[pair] + beta * treatment
-    y =  pyro.sample("y", dist.Normal(y_hat, sigma_y), obs=y)
+    with pyro.plate("data", N):
+        y_hat = a[pair] + beta * treatment
+        y =  pyro.sample("y", dist.Normal(y_hat, sigma_y), obs=y)
 

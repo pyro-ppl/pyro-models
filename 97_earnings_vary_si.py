@@ -44,11 +44,13 @@ def model(data, params):
     # model block
     mu_a1 = pyro.sample('mu_a1', dist.Normal(0., 1.))
     mu_a2 = pyro.sample('mu_a2', dist.Normal(0., 1.))
-    sigma_a1 =  pyro.sample("sigma_a1", dist.HalfCauchy(5.))
-    sigma_a2 =  pyro.sample("sigma_a2", dist.HalfCauchy(5.))
-    a1 = pyro.sample('a1', dist.Normal(10. * mu_a1, sigma_a1).expand([4]))
-    a2 = pyro.sample('a2', dist.Normal(0.01 * mu_a2, sigma_a2).expand([4]))
+    sigma_a1 =  pyro.sample("sigma_a1", dist.HalfCauchy(2.))
+    sigma_a2 =  pyro.sample("sigma_a2", dist.HalfCauchy(2.))
     sigma_y =  pyro.sample("sigma_y", dist.HalfCauchy(5.))
-    y_hat = a1[eth] + a2[eth] * height
-    log_earn = pyro.sample("log_earn", dist.Normal(y_hat, sigma_y), obs=log_earn)
+    with pyro.plate('as', 4):
+        a1 = pyro.sample('a1', dist.Normal(10. * mu_a1, sigma_a1))
+        a2 = pyro.sample('a2', dist.Normal(0.01 * mu_a2, sigma_a2))
+    with pyro.plate('data', N):
+        y_hat = a1[eth] + a2[eth] * height
+        log_earn = pyro.sample("log_earn", dist.Normal(y_hat, sigma_y), obs=log_earn)
 

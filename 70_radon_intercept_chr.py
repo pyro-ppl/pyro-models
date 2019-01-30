@@ -30,10 +30,12 @@ def model(data, params):
     y = data["y"]
 
     # model block
-    mu_a =  pyro.sample("mu_a", dist.Normal(0., 1.).expand([J]))
-    eta =  pyro.sample("eta", dist.Normal(0., 1.).expand([J]))
+    with pyro.plate("J", J):
+        mu_a =  pyro.sample("mu_a", dist.Normal(0., 1.))
+        eta =  pyro.sample("eta", dist.Normal(0., 1.))
+        sigma_a =  pyro.sample("sigma_a", dist.HalfCauchy(2.5))
     sigma =  pyro.sample("sigma", dist.HalfCauchy(2.5))
-    sigma_a =  pyro.sample("sigma_a", dist.HalfCauchy(2.5).expand([J]))
     a = 10 * mu_a + sigma_a * eta
-    y_hat = a[county]
-    y = pyro.sample('y', dist.Normal(y_hat, sigma), obs=y)
+    with pyro.plate("data", N):
+        y_hat = a[county]
+        y = pyro.sample('y', dist.Normal(y_hat, sigma), obs=y)

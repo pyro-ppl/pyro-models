@@ -33,7 +33,9 @@ def model(data, params):
     mu_eta =  pyro.sample("mu_eta", dist.Normal(0., 1.))
     sigma_eta =  pyro.sample("sigma_eta", dist.Uniform(0., 100.))
     sigma_y =  pyro.sample("sigma_y", dist.Uniform(0., 100.))
-    et =  pyro.sample("eta", dist.Normal(0., sigma_eta).expand([J]))
-    eta = 100 * mu_eta + sigma_eta * et
-    y_hat = 100 * mu_eta + eta[county]
-    y =  pyro.sample("y", dist.Normal(y_hat, sigma_y), obs=y)
+    with pyro.plate("J", J):
+        et =  pyro.sample("eta", dist.Normal(0., sigma_eta).expand([J]))
+        eta = 100 * mu_eta + sigma_eta * et
+    with pyro.plate("data", N):
+        y_hat = 100 * mu_eta + eta[county]
+        y =  pyro.sample("y", dist.Normal(y_hat, sigma_y), obs=y)

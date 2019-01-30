@@ -41,8 +41,11 @@ def model(data, params):
     sigma_alpha =  pyro.sample("sigma_alpha", dist.HalfCauchy(2.5))
     mu_beta =  pyro.sample("mu_beta", dist.Normal(0., 1.))
     sigma_beta =  pyro.sample("sigma_beta", dist.HalfCauchy(2.5))
-    alpha =  pyro.sample("alpha", dist.Normal(mu_alpha, sigma_alpha).expand([J]))
-    beta =  pyro.sample("beta", dist.Normal(mu_beta, sigma_beta).expand([2]))
-    y_hat = alpha[county] + x * beta[0] + u * beta[1]
-    y = pyro.sample('y', dist.Normal(beta[0] + beta[1] * x, sigma), obs=y)
+    with pyro.plate("J", J):
+        alpha =  pyro.sample("alpha", dist.Normal(mu_alpha, sigma_alpha))
+    with pyro.plate("2", 2):
+        beta =  pyro.sample("beta", dist.Normal(mu_beta, sigma_beta))
+    with pyro.plate("data", N):
+        y_hat = alpha[county] + x * beta[0] + u * beta[1]
+        y = pyro.sample('y', dist.Normal(beta[0] + beta[1] * x, sigma), obs=y)
 

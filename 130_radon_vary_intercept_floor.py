@@ -23,19 +23,8 @@ def validate_data_def(data):
 
 def init_params(data):
     params = {}
-    # initialize data
-    J = data["J"]
-    N = data["N"]
-    county = data["county"]
-    u = data["u"]
-    x = data["x"]
-    y = data["y"]
-    # assign init values for parameters
-    params["a"] = init_vector("a", dims=(J)) # vector
-    params["b"] = init_vector("b", dims=(2)) # vector
     params["sigma_a"] = pyro.sample("sigma_a", dist.Uniform(0., 100.))
     params["sigma_y"] = pyro.sample("sigma_y", dist.Uniform(0., 100.))
-
     return params
 
 def model(data, params):
@@ -46,17 +35,14 @@ def model(data, params):
     u = data["u"]
     x = data["x"]
     y = data["y"]
-
-    # init parameters
-    a = params["a"]
-    b = params["b"]
     sigma_a = params["sigma_a"]
     sigma_y = params["sigma_y"]
-    # initialize transformed parameters
-    y_hat = a[county] + u * b[0] + x * b[1]
-
     mu_a =  pyro.sample("mu_a", dist.Normal(0., 1))
-    a =  pyro.sample("a", dist.Normal(mu_a, sigma_a))
-    b =  pyro.sample("b", dist.Normal(0., 1))
-    y =  pyro.sample("y", dist.Normal(y_hat, sigma_y), obs=y)
+    with pyro.plate("J", J):
+        a =  pyro.sample("a", dist.Normal(mu_a, sigma_a))
+    with pyro.plate("2", 2):
+        b =  pyro.sample("b", dist.Normal(0., 1))
+    with pyro.plate("data", N):
+        y_hat = a[county] + u * b[0] + x * b[1]
+        y =  pyro.sample("y", dist.Normal(y_hat, sigma_y), obs=y)
 

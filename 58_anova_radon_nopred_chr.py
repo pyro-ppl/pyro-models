@@ -39,8 +39,10 @@ def model(data, params):
     sigma_y = params["sigma_y"]
     # model block
     mu_a =  pyro.sample("mu_a", dist.Normal(0., 1))
-    eta =  pyro.sample("eta", dist.Normal(0., 1).expand([J]))
+    with pyro.plate("J", J):
+        eta =  pyro.sample("eta", dist.Normal(0., 1))
     a =  mu_a + sigma_a * eta
-    y_hat = a[county]
-    y =  pyro.sample("y", dist.Normal(y_hat, sigma_y), obs=y)
+    with pyro.plate("data", N):
+        y_hat = a[county]
+        y =  pyro.sample("y", dist.Normal(y_hat, sigma_y), obs=y)
 

@@ -23,16 +23,9 @@ def validate_data_def(data):
 
 def init_params(data):
     params = {}
-    # initialize data
-    J = data["J"]
-    N = data["N"]
-    county = data["county"]
-    u = data["u"]
-    y = data["y"]
     # assign init values for parameters
     params["sigma_a"] = pyro.sample("sigma_a", dist.Uniform(0., 100.))
     params["sigma_y"] = pyro.sample("sigma_y", dist.Uniform(0., 100.))
-
     return params
 
 def model(data, params):
@@ -49,8 +42,10 @@ def model(data, params):
     # initialize transformed parameters
 
     mu_a =  pyro.sample("mu_a", dist.Normal(0., 1))
-    eta =  pyro.sample("eta", dist.Normal(0., 1).expand([J]))
+    with pyro.plate("J", J):
+        eta =  pyro.sample("eta", dist.Normal(0., 1))
     b =  pyro.sample("b", dist.Normal(0., 1))
     a = mu_a + sigma_a * eta
-    y_hat = a[county] + u * b * 0.1
-    y =  pyro.sample("y", dist.Normal(y_hat, sigma_y), obs=y)
+    with pyro.plate("data", N):
+        y_hat = a[county] + u * b * 0.1
+        y =  pyro.sample("y", dist.Normal(y_hat, sigma_y), obs=y)

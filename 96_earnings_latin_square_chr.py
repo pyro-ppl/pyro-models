@@ -55,22 +55,28 @@ def model(data, params):
     sigma_d = params["sigma_d"]
     sigma_y = params["sigma_y"]
 
+    plate_a = pyro.plate("as", n_eth, dim=-2)
+    plate_b = pyro.plate("bs", n_age, dim=-1)
+
     # model block
     mu_a1 = pyro.sample('mu_a1', dist.Normal(0., 1.))
     mu_a2 = pyro.sample('mu_a2', dist.Normal(0., 1.))
-    eta_a1 = pyro.sample('eta_a1', dist.Normal(0., 1.).expand([n_eth]))
-    eta_a2 = pyro.sample('eta_a2', dist.Normal(0., 1.).expand([n_eth]))
-
     mu_b1 = pyro.sample('mu_b1', dist.Normal(0., 1.))
     mu_b2 = pyro.sample('mu_b2', dist.Normal(0., 1.))
-    eta_b1 = pyro.sample('eta_b1', dist.Normal(0., 1.).expand([n_age]))
-    eta_b2 = pyro.sample('eta_b2', dist.Normal(0., 1.).expand([n_age]))
-
     mu_c = pyro.sample('mu_c', dist.Normal(0., 1.))
-    eta_c = pyro.sample('eta_c', dist.Normal(0., 1.).expand([n_eth, n_age]))
-
     mu_d = pyro.sample('mu_d', dist.Normal(0., 1.))
-    eta_d = pyro.sample('eta_d', dist.Normal(0., 1.).expand([n_eth, n_age]))
+
+    with plate_a:
+        eta_a1 = pyro.sample('eta_a1', dist.Normal(0., 1.))
+        eta_a2 = pyro.sample('eta_a2', dist.Normal(0., 1.))
+
+    with plate_b:
+        eta_b1 = pyro.sample('eta_b1', dist.Normal(0., 1.))
+        eta_b2 = pyro.sample('eta_b2', dist.Normal(0., 1.))
+
+    with plate_a, plate_b:
+        eta_c = pyro.sample('eta_c', dist.Normal(0., 1.))
+        eta_d = pyro.sample('eta_d', dist.Normal(0., 1.))
 
     # transformed parameters
     a1 = 5 * mu_a1 + sigma_a1 * eta_a1
@@ -80,7 +86,8 @@ def model(data, params):
     c = 0.1 * mu_c + sigma_c * eta_c
     d = 0.01 * mu_d + sigma_d * eta_d
 
-    y_hat = a1[eth] + a2[eth] * x_centered + b1[age] + b2[age] * \
-            x_centered + c[eth, age] + d[eth, age] * x_centered
+    with pyro.plate("data", N):
+        y_hat = a1[eth].squeeze(1) + a2[eth].squeeze(1) * x_centered + b1[age] + b2[age] * \
+                x_centered + c[eth, age] + d[eth, age] * x_centered
 
-    pyro.sample('y', dist.Normal(y_hat, sigma_y), obs=y)
+        pyro.sample('y', dist.Normal(y_hat, sigma_y), obs=y)

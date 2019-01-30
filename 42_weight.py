@@ -53,4 +53,5 @@ def model(data, params):
     # initialize transformed parameters
 
     # model block
-    weight = pyro.sample('weight', dist.Normal(a + b * c_height, sigma), obs=weight)
+    with pyro.plate("data", N):
+        weight = pyro.sample('weight', dist.Normal(a + b * c_height, sigma), obs=weight)

@@ -34,5 +34,6 @@ def model(data, params):
     # initialize transformed parameters
     # model block
 
-    sigma =  pyro.sample("sigma", dist.Cauchy(torch.tensor(0.), torch.tensor(2.5)).expand([N])).abs()
-    earn_pos = pyro.sample('earn_pos', dist.Bernoulli(logits=beta[0] + beta[1] * height + beta[2] * male), obs=earn_pos)
+    with pyro.plate("data", N):
+        sigma =  pyro.sample("sigma", dist.HalfCauchy(torch.tensor(2.5)))
+        earn_pos = pyro.sample('earn_pos', dist.Bernoulli(logits=beta[0] + beta[1] * height + beta[2] * male), obs=earn_pos)

@@ -33,5 +33,6 @@ def model(data, params):
     # init parameters
     beta = params["beta"]
     sigma = params["sigma"]
-    pyro.sample('obs', dist.Normal(beta[0] + beta[1] * x, sigma), obs=y)
+    with pyro.plate("data", N):
+        pyro.sample('obs', dist.Normal(beta[0] + beta[1] * x, sigma), obs=y)
 

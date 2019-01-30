@@ -56,5 +56,6 @@ def model(data, params):
     sigma = params["sigma"]
     # initialize transformed parameters
     # model block
-    score1 = pyro.sample('score1', dist.Normal(beta[0] + beta[1] * party + beta[2] * x + beta[3] * inter, sigma), obs=score1)
+    with pyro.plate("data", N):
+        score1 = pyro.sample('score1', dist.Normal(beta[0] + beta[1] * party + beta[2] * x + beta[3] * inter, sigma), obs=score1)
 

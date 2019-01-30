@@ -44,4 +44,5 @@ def model(data, params):
     sigma = params["sigma"]
     # initialize transformed parameters
     # model block
-    pyro.sample('post_test', dist.Normal(beta[0] + beta[1] * treatment + beta[2] * pre_test, sigma), obs=post_test)
+    with pyro.plate("data", N):
+        pyro.sample('post_test', dist.Normal(beta[0] + beta[1] * treatment + beta[2] * pre_test, sigma), obs=post_test)

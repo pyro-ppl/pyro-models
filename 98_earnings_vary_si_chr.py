@@ -46,9 +46,11 @@ def model(data, params):
     sigma_a1 =  pyro.sample("sigma_a1", dist.HalfCauchy(5.))
     sigma_a2 =  pyro.sample("sigma_a2", dist.HalfCauchy(5.))
     sigma_y =  pyro.sample("sigma_y", dist.HalfCauchy(5.))
-    eta1 = pyro.sample('eta1', dist.Normal(10. * mu_a1, sigma_a1).expand([4]))
-    eta2 = pyro.sample('eta2', dist.Normal(0.01 * mu_a2, sigma_a2).expand([4]))
+    with pyro.plate('etas', 4):
+        eta1 = pyro.sample('eta1', dist.Normal(10. * mu_a1, sigma_a1))
+        eta2 = pyro.sample('eta2', dist.Normal(0.01 * mu_a2, sigma_a2))
     a1 = 10 * mu_a1 + sigma_a1 * eta1;
     a2 = 0.1 * mu_a2 + sigma_a2 * eta2;
-    y_hat = a1[eth] + a2[eth] * height
-    log_earn = pyro.sample("log_earn", dist.Normal(y_hat, sigma_y), obs=log_earn)
+    with pyro.plate('data', N):
+        y_hat = a1[eth] + a2[eth] * height
+        log_earn = pyro.sample("log_earn", dist.Normal(y_hat, sigma_y), obs=log_earn)

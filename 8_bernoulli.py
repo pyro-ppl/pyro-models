@@ -23,6 +23,6 @@ def model(data, params):
     # initialize data
     N = data["N"]
     y = data["y"]
-    theta =  pyro.sample("theta", dist.Beta(1., 1.))
-    pyro.sample('obs', dist.Bernoulli(theta), obs=y)
-
+    with pyro.plate("data", N):
+        theta =  pyro.sample("theta", dist.Beta(1., 1.))
+        pyro.sample('obs', dist.Bernoulli(theta), obs=y)
