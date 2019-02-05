@@ -24,10 +24,8 @@ def init_params(data):
     y = data["y"]
     sigma = data["sigma"]
     # assign init values for parameters
-    params["mu"] = pyro.sample("mu"))
-    params["theta"] = pyro.sample("theta", dims=(J)))
-    params["tau"] = pyro.sample("tau", dist.Uniform(0))
-
+    params["mu"] = pyro.sample("mu", dist.Normal(0., 1.))
+    params["theta"] = init_vector("theta", dims=(J))
     return params
 
 def model(data, params):
@@ -35,14 +33,12 @@ def model(data, params):
     J = data["J"]
     y = data["y"]
     sigma = data["sigma"]
-    
+
     # init parameters
     mu = params["mu"]
     theta = params["theta"]
-    tau = params["tau"]
+    tau = pyro.sample('tau', dist.HalfCauchy(2.5))
+    sigma = pyro.sample('sigma', dist.HalfCauchy(2.5))
     # initialize transformed parameters
-    # model block
-
-    theta =  _pyro_sample(theta, "theta", "normal", [mu, tau])
-    y =  _pyro_sample(y, "y", "normal", [theta, sigma], obs=y)
-
+    with pyro.plate('data', J):
+        y = pyro.sample('y', dist.Normal(theta, sigma), obs=y)

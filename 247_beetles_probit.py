@@ -25,27 +25,13 @@ def transformed_data(data):
     n = data["n"]
     r = data["r"]
     x = data["x"]
-    centered_x = init_vector("centered_x", dims=(N)) # vector
-    mean_x = pyro.sample("mean_x"))
-    mean_x = _pyro_assign(mean_x, _call_func("mean", [x]))
-    centered_x = _pyro_assign(centered_x, _call_func("subtract", [x,mean_x]))
+    mean_x = x.mean()
+    centered_x = x - mean_x
     data["centered_x"] = centered_x
     data["mean_x"] = mean_x
 
 def init_params(data):
     params = {}
-    # initialize data
-    N = data["N"]
-    n = data["n"]
-    r = data["r"]
-    x = data["x"]
-    # initialize transformed data
-    centered_x = data["centered_x"]
-    mean_x = data["mean_x"]
-    # assign init values for parameters
-    params["alpha_star"] = pyro.sample("alpha_star"))
-    params["beta"] = pyro.sample("beta"))
-
     return params
 
 def model(data, params):
@@ -57,17 +43,11 @@ def model(data, params):
     # initialize transformed data
     centered_x = data["centered_x"]
     mean_x = data["mean_x"]
-    
-    # init parameters
-    alpha_star = params["alpha_star"]
-    beta = params["beta"]
-    # initialize transformed parameters
-    p = pyro.sample("p", dims=(N)))
-    for i in range(1, to_int(N) + 1):
-        p[i - 1] = _pyro_assign(p[i - 1], _call_func("Phi", [(alpha_star + (beta * _index_select(centered_x, i - 1) ))]))
-    # model block
 
-    alpha_star =  _pyro_sample(alpha_star, "alpha_star", "normal", [0.0., 1.0])
-    beta =  _pyro_sample(beta, "beta", "normal", [0.0., 10000.0])
-    r =  _pyro_sample(r, "r", "binomial", [n, p], obs=r)
+    # initialize transformed parameters
+    alpha_star =  pyro.sample("alpha_star", dist.Normal(0., 1.0))
+    beta =  pyro.sample("beta", dist.Normal(0., 10000.0))
+    with pyro.plate('data', N):
+        p = dist.Normal(0., 1.).cdf(alpha_star + beta * centered_x)
+        r =  pyro.sample("r", dist.Binomial(n, p), obs=r)
 

@@ -31,39 +31,18 @@ def transformed_data(data):
     site = data["site"]
     watched_hat = data["watched_hat"]
     y = data["y"]
-    site2 = init_vector("site2", dims=(N)) # vector
-    site3 = init_vector("site3", dims=(N)) # vector
-    site4 = init_vector("site4", dims=(N)) # vector
-    site5 = init_vector("site5", dims=(N)) # vector
-    for i in range(1, to_int(N) + 1):
-
-        site2[i - 1] = _pyro_assign(site2[i - 1], _call_func("logical_eq", [_index_select(site, i - 1) ,2]))
-        site3[i - 1] = _pyro_assign(site3[i - 1], _call_func("logical_eq", [_index_select(site, i - 1) ,3]))
-        site4[i - 1] = _pyro_assign(site4[i - 1], _call_func("logical_eq", [_index_select(site, i - 1) ,4]))
-        site5[i - 1] = _pyro_assign(site5[i - 1], _call_func("logical_eq", [_index_select(site, i - 1) ,5]))
-    data["site2"] = site2
-    data["site3"] = site3
-    data["site4"] = site4
-    data["site5"] = site5
+    site2 = site == 2
+    site3 = site == 3
+    site4 = site == 4
+    site5 = site == 5
+    data["site2"] = site2.float()
+    data["site3"] = site3.float()
+    data["site4"] = site4.float()
+    data["site5"] = site5.float()
 
 def init_params(data):
     params = {}
-    # initialize data
-    N = data["N"]
-    pretest = data["pretest"]
-    setting = data["setting"]
-    site = data["site"]
-    watched_hat = data["watched_hat"]
-    y = data["y"]
-    # initialize transformed data
-    site2 = data["site2"]
-    site3 = data["site3"]
-    site4 = data["site4"]
-    site5 = data["site5"]
-    # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(8)) # vector
-    params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
-
     return params
 
 def model(data, params):
@@ -79,12 +58,14 @@ def model(data, params):
     site3 = data["site3"]
     site4 = data["site4"]
     site5 = data["site5"]
-    
+
     # init parameters
     beta = params["beta"]
-    sigma = params["sigma"]
+    sigma = pyro.sample('sigma', dist.HalfCauchy(2.5))
     # initialize transformed parameters
     # model block
 
-    y =  _pyro_sample(y, "y", "normal", [_call_func("add", [_call_func("add", [_call_func("add", [_call_func("add", [_call_func("add", [_call_func("add", [_call_func("add", [_index_select(beta, 1 - 1) ,_call_func("multiply", [_index_select(beta, 2 - 1) ,watched_hat])]),_call_func("multiply", [_index_select(beta, 3 - 1) ,pretest])]),_call_func("multiply", [_index_select(beta, 4 - 1) ,site2])]),_call_func("multiply", [_index_select(beta, 5 - 1) ,site3])]),_call_func("multiply", [_index_select(beta, 6 - 1) ,site4])]),_call_func("multiply", [_index_select(beta, 7 - 1) ,site5])]),_call_func("multiply", [_index_select(beta, 8 - 1) ,setting])]), sigma], obs=y)
-
+    with pyro.plate('data', N):
+        y = pyro.sample('obs', dist.Normal(beta[0] + beta[1] * watched_hat + \
+                        beta[2] * pretest + beta[3] * site2 + beta[4] * site3 + \
+                        beta[5] * site4 + beta[6] * site5 + beta[7] * setting, sigma), obs=y)

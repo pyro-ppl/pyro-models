@@ -19,14 +19,7 @@ def validate_data_def(data):
 
 def init_params(data):
     params = {}
-    # initialize data
-    N = data["N"]
-    encouraged = data["encouraged"]
-    watched = data["watched"]
-    # assign init values for parameters
     params["beta"] = init_vector("beta", dims=(2)) # vector
-    params["sigma"] = pyro.sample("sigma", dist.Uniform(0))
-
     return params
 
 def model(data, params):
@@ -34,12 +27,11 @@ def model(data, params):
     N = data["N"]
     encouraged = data["encouraged"]
     watched = data["watched"]
-    
+
     # init parameters
     beta = params["beta"]
-    sigma = params["sigma"]
+    sigma = pyro.sample('sigma', dist.HalfCauchy(2.5))
     # initialize transformed parameters
-    # model block
-
-    watched =  _pyro_sample(watched, "watched", "normal", [_call_func("add", [_index_select(beta, 1 - 1) ,_call_func("multiply", [_index_select(beta, 2 - 1) ,encouraged])]), sigma], obs=watched)
+    with pyro.plate('data', N):
+        watched = pyro.sample('y', dist.Normal(beta[0] + beta[1] * encouraged, sigma), obs=watched)
 

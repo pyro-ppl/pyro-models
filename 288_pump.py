@@ -19,15 +19,6 @@ def validate_data_def(data):
 
 def init_params(data):
     params = {}
-    # initialize data
-    N = data["N"]
-    x = data["x"]
-    t = data["t"]
-    # assign init values for parameters
-    params["alpha"] = pyro.sample("alpha", dist.Uniform(0))
-    params["beta"] = pyro.sample("beta", dist.Uniform(0))
-    params["theta"] = init_vector("theta", dist.Uniform(0., dims=(N)) # vector
-
     return params
 
 def model(data, params):
@@ -35,16 +26,10 @@ def model(data, params):
     N = data["N"]
     x = data["x"]
     t = data["t"]
-    
-    # init parameters
-    alpha = params["alpha"]
-    beta = params["beta"]
-    theta = params["theta"]
-    # initialize transformed parameters
-    # model block
 
-    alpha =  _pyro_sample(alpha, "alpha", "exponential", [1.0])
-    beta =  _pyro_sample(beta, "beta", "gamma", [0.10000000000000001, 1.0])
-    theta =  _pyro_sample(theta, "theta", "gamma", [alpha, beta])
-    x =  _pyro_sample(x, "x", "poisson", [_call_func("elt_multiply", [theta,t])], obs=x)
+    alpha =  pyro.sample("alpha", dist.Exponential(1.0))
+    beta =  pyro.sample("beta", dist.Gamma(0.1, 1.0))
+    with pyro.plate('data', N):
+        theta =  pyro.sample("theta", dist.Gamma(alpha, beta))
+        x =  pyro.sample("x", dist.Poisson(theta * t), obs=x)
 

@@ -25,18 +25,6 @@ def validate_data_def(data):
 
 def init_params(data):
     params = {}
-    # initialize data
-    J = data["J"]
-    K = data["K"]
-    N = data["N"]
-    jj = data["jj"]
-    kk = data["kk"]
-    y = data["y"]
-    # assign init values for parameters
-    params["delta"] = pyro.sample("delta"))
-    params["alpha"] = pyro.sample("alpha", dims=(J)))
-    params["beta"] = pyro.sample("beta", dims=(K)))
-
     return params
 
 def model(data, params):
@@ -44,20 +32,18 @@ def model(data, params):
     J = data["J"]
     K = data["K"]
     N = data["N"]
-    jj = data["jj"]
-    kk = data["kk"]
+    jj = data["jj"].long() - 1
+    kk = data["kk"].long() - 1
     y = data["y"]
-    
-    # init parameters
-    delta = params["delta"]
-    alpha = params["alpha"]
-    beta = params["beta"]
+
     # initialize transformed parameters
     # model block
 
-    alpha =  _pyro_sample(alpha, "alpha", "normal", [0., 1])
-    beta =  _pyro_sample(beta, "beta", "normal", [0., 1])
-    delta =  _pyro_sample(delta, "delta", "normal", [0.75, 1])
-    for n in range(1, to_int(N) + 1):
-        y[n - 1] =  _pyro_sample(_index_select(y, n - 1) , "y[%d]" % (to_int(n-1)), "bernoulli_logit", [((_index_select(alpha, jj[n - 1] - 1)  - _index_select(beta, kk[n - 1] - 1) ) + delta)], obs=_index_select(y, n - 1) )
+    with pyro.plate('alpha_', J):
+        alpha =  pyro.sample("alpha", dist.Normal(0., 1.))
+    with pyro.plate('beta', K):
+        beta =  pyro.sample("beta_", dist.Normal(0., 1.))
+    delta =  pyro.sample("delta", dist.Normal(0.75, 1.))
+    with pyro.plate('data', N):
+        y = pyro.sample('y', dist.Bernoulli(logits=alpha[jj] - beta[kk] + delta), obs=y)
 

@@ -25,22 +25,6 @@ def validate_data_def(data):
 
 def init_params(data):
     params = {}
-    # initialize data
-    J = data["J"]
-    K = data["K"]
-    N = data["N"]
-    jj = data["jj"]
-    kk = data["kk"]
-    y = data["y"]
-    # assign init values for parameters
-    params["delta"] = pyro.sample("delta"))
-    params["alpha"] = pyro.sample("alpha", dims=(J)))
-    params["beta"] = pyro.sample("beta", dims=(K)))
-    params["log_gamma"] = pyro.sample("log_gamma", dims=(K)))
-    params["sigma_alpha"] = pyro.sample("sigma_alpha", dist.Uniform(0))
-    params["sigma_beta"] = pyro.sample("sigma_beta", dist.Uniform(0))
-    params["sigma_gamma"] = pyro.sample("sigma_gamma", dist.Uniform(0))
-
     return params
 
 def model(data, params):
@@ -48,28 +32,18 @@ def model(data, params):
     J = data["J"]
     K = data["K"]
     N = data["N"]
-    jj = data["jj"]
-    kk = data["kk"]
+    jj = data["jj"].long() - 1
+    kk = data["kk"].long() - 1
     y = data["y"]
-    
-    # init parameters
-    delta = params["delta"]
-    alpha = params["alpha"]
-    beta = params["beta"]
-    log_gamma = params["log_gamma"]
-    sigma_alpha = params["sigma_alpha"]
-    sigma_beta = params["sigma_beta"]
-    sigma_gamma = params["sigma_gamma"]
-    # initialize transformed parameters
-    # model block
-
-    alpha =  _pyro_sample(alpha, "alpha", "normal", [0., sigma_alpha])
-    beta =  _pyro_sample(beta, "beta", "normal", [0., sigma_beta])
-    log_gamma =  _pyro_sample(log_gamma, "log_gamma", "normal", [0., sigma_gamma])
-    delta =  _pyro_sample(delta, "delta", "cauchy", [0., 5])
-    sigma_alpha =  _pyro_sample(sigma_alpha, "sigma_alpha", "cauchy", [0., 5])
-    sigma_beta =  _pyro_sample(sigma_beta, "sigma_beta", "cauchy", [0., 5])
-    sigma_gamma =  _pyro_sample(sigma_gamma, "sigma_gamma", "cauchy", [0., 5])
-    for n in range(1, to_int(N) + 1):
-        y[n - 1] =  _pyro_sample(_index_select(y, n - 1) , "y[%d]" % (to_int(n-1)), "bernoulli_logit", [(_call_func("exp", [_index_select(log_gamma, kk[n - 1] - 1) ]) * ((_index_select(alpha, jj[n - 1] - 1)  - _index_select(beta, kk[n - 1] - 1) ) + delta))], obs=_index_select(y, n - 1) )
-
+    sigma_alpha =  pyro.sample("sigma_alpha", dist.HalfCauchy(5.))
+    sigma_beta =  pyro.sample("sigma_beta", dist.HalfCauchy(5.))
+    sigma_gamma =  pyro.sample("sigma_gamma", dist.HalfCauchy(5.))
+    with pyro.plate('alpha_', J):
+        alpha =  pyro.sample("alpha", dist.Normal(0., sigma_alpha))
+    with pyro.plate('beta_', K):
+        beta =  pyro.sample("beta", dist.Normal(0., sigma_beta))
+        log_gamma =  pyro.sample("log_gamma", dist.Normal(0., sigma_gamma))
+    delta =  pyro.sample("delta", dist.Cauchy(0., 5))
+    with pyro.plate('data', N):
+        y = pyro.sample('y', dist.Bernoulli(logits= log_gamma[kk].exp()
+                                            * (alpha[jj] - beta[kk] + delta)), obs=y)
