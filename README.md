@@ -7,7 +7,7 @@ The data corresponding to each model is in JSON format and named `[model_file].p
 Tested on PyTorch 1.0 and Pyro 0.3.
 
 ### Note
-Intialized variables are uniformly sampled within their domains.
+Initialized variables are uniformly sampled within their domains.
 ```diff
 - real<lower=0,upper=100> sigma;
 + sigma = pyro.sample("sigma", dist.Uniform(0., 100.))
@@ -19,8 +19,10 @@ Constrained samples from improper distribution are sampled from a HalfCauchy:
 + sigma_a1 =  pyro.sample("sigma", dist.HalfCauchy(2.))
 ```
 
+For inference to work, you may have to change the initializations of the model parameters.
+
 ## Citation
-If you use these models in your research, please consider citing
+If you use these models in your research, please consider citing:
 ```
 @inproceedings{chen2018transpiling,
   title={Transpiling Stan models to Pyro},

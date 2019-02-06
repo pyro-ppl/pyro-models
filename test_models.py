@@ -1,10 +1,14 @@
-import torch
-import pyro
-import pyro.distributions as dist
 import json
 import argparse
 import importlib
+from six import string_types
 
+import torch
+import pyro
+import pyro.distributions as dist
+from pyro.infer import SVI, Trace_ELBO
+from pyro.contrib.autoguide import AutoDelta, AutoDiagonalNormal
+import pyro.optim as optim
 
 def json_file_to_mem_format(fname):
     with open(fname, "r") as f:
@@ -19,7 +23,13 @@ def json_file_to_mem_format(fname):
 
 
 def tensorize_data(data):
-    from six import string_types
+    """
+    Convert python lists of data into pytorch tensors
+    in-place operation
+
+    :param data: Python dict of data with variable names as keys and values as values
+    :type data: dict
+    """
     to_delete = []
     for k in data:
         if isinstance(data[k], float) or isinstance(data[k], int):
@@ -45,14 +55,14 @@ def tensorize_data(data):
 def main(args):
     pyro.enable_validation(True)
     pyro.clear_param_store()
-    from pyro.infer import SVI, Trace_ELBO
-    from pyro.contrib.autoguide import AutoDelta, AutoDiagonalNormal
-    import pyro.optim as optim
     module = importlib.import_module(args.fname[:-3])
     model_block = module.model
     def model(data, params):
+        # we need to wrap init_params in the model because of how
+        # Stan's parameter blocks work
         params = module.init_params(data)
         model_block(data, params)
+    # MAP estimates
     guide = AutoDelta(model)
     svi = SVI(model, guide, optim.Adam({'lr': 0.1}), loss=Trace_ELBO())
     data = json_file_to_mem_format(args.fname + '.json')
@@ -68,6 +78,6 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="parse args")
     parser.add_argument('-n', '--num-epochs', default=10, type=int)
-    parser.add_argument('-f', '--fname', default='100_pilots_chr.py', type=str)
+    parser.add_argument('-f', '--fname', type=str, help="python file path")
     args = parser.parse_args()
     main(args)
