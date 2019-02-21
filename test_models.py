@@ -10,6 +10,7 @@ from pyro.infer import SVI, Trace_ELBO
 from pyro.contrib.autoguide import AutoDelta, AutoDiagonalNormal
 import pyro.optim as optim
 
+
 def json_file_to_mem_format(fname):
     with open(fname, "r") as f:
         rdata = json.load(f)
@@ -46,9 +47,8 @@ def tensorize_data(data):
         elif isinstance(data[k], torch.Tensor):
             data[k] = torch.tensor(data[k]).float()
         else:
-            raise ValueError("invalid tensorization of data dict")
+            raise ValueError("Invalid tensorization of data dict")
     for k in to_delete:
-        print("Deleting k=%s string data in dict" % k)
         del data[k]
 
 
@@ -58,16 +58,17 @@ def main(args):
     module = importlib.import_module(args.fname[:-3])
     model_block = module.model
     def model(data, params):
-        # we need to wrap init_params in the model because of how
-        # Stan's parameter blocks work
+        # we need to wrap init_params in the model because variables declared
+        # in Stan's "parameters" block are actually random variables
         params = module.init_params(data)
         model_block(data, params)
-    # MAP estimates
     guide = AutoDelta(model)
     svi = SVI(model, guide, optim.Adam({'lr': 0.1}), loss=Trace_ELBO())
     data = json_file_to_mem_format(args.fname + '.json')
+    # convert dicts to torch tensors
     tensorize_data(data)
     if hasattr(module, 'transformed_data'):
+        # run transformed_data block if it exists
         module.transformed_data(data)
     for i in range(args.num_epochs):
         params = {}
