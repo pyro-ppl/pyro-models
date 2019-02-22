@@ -1,4 +1,4 @@
-# model file: ../example-models/ARM/Ch.4/kidiq_interaction_c.stan
+# model file: example-models/ARM/Ch.4/kidiq_interaction_c.stan
 import torch
 import pyro
 import pyro.distributions as dist

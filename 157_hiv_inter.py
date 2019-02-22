@@ -1,4 +1,4 @@
-# model file: ../example-models/ARM/Ch.20/hiv_inter.stan
+# model file: example-models/ARM/Ch.20/hiv_inter.stan
 import torch
 import pyro
 import pyro.distributions as dist

@@ -1,4 +1,4 @@
-# model file: ../example-models/Bayesian_Cognitive_Modeling/GettingStarted/Rate_1.stan
+# model file: example-models/Bayesian_Cognitive_Modeling/GettingStarted/Rate_1.stan
 import torch
 import pyro
 import pyro.distributions as dist

@@ -1,4 +1,4 @@
-# model file: ../example-models/misc/eight_schools/eight_schools.stan
+# model file: example-models/misc/eight_schools/eight_schools.stan
 import torch
 import pyro
 import pyro.distributions as dist

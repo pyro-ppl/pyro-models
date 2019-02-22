@@ -1,4 +1,4 @@
-# model file: ../example-models/ARM/Ch.6/wells_logit.stan
+# model file: example-models/ARM/Ch.6/wells_logit.stan
 import torch
 import pyro
 import pyro.distributions as dist

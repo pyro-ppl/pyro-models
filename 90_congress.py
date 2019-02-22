@@ -1,4 +1,4 @@
-# model file: ../example-models/ARM/Ch.7/congress.stan
+# model file: example-models/ARM/Ch.7/congress.stan
 import torch
 import pyro
 import pyro.distributions as dist

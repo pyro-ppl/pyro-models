@@ -1,4 +1,4 @@
-# model file: ../example-models/ARM/Ch.12/radon_group.stan
+# model file: example-models/ARM/Ch.12/radon_group.stan
 import torch
 import pyro
 import pyro.distributions as dist

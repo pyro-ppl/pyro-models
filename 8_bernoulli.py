@@ -1,4 +1,4 @@
-# model file: ../example-models/basic_estimators/bernoulli.stan
+# model file: example-models/basic_estimators/bernoulli.stan
 import torch
 import pyro
 import pyro.distributions as dist

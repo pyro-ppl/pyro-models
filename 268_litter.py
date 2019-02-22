@@ -1,4 +1,4 @@
-# model file: ../example-models/bugs_examples/vol1/litter/litter.stan
+# model file: example-models/bugs_examples/vol1/litter/litter.stan
 import torch
 import pyro
 import pyro.distributions as dist

@@ -1,4 +1,4 @@
-# model file: ../example-models/ARM/Ch.4/logearn_interaction_z.stan
+# model file: example-models/ARM/Ch.4/logearn_interaction_z.stan
 import torch
 import pyro
 import pyro.distributions as dist

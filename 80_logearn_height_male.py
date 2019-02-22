@@ -1,4 +1,4 @@
-# model file: ../example-models/ARM/Ch.4/logearn_height_male.stan
+# model file: example-models/ARM/Ch.4/logearn_height_male.stan
 import torch
 import pyro
 import pyro.distributions as dist

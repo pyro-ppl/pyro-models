@@ -1,4 +1,4 @@
-# model file: ../example-models/ARM/Ch.13/radon_inter_vary.stan
+# model file: example-models/ARM/Ch.13/radon_inter_vary.stan
 import torch
 import pyro
 import pyro.distributions as dist

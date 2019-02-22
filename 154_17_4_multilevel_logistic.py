@@ -1,4 +1,4 @@
-# model file: ../example-models/ARM/Ch.17/17.4_multilevel_logistic.stan
+# model file: example-models/ARM/Ch.17/17.4_multilevel_logistic.stan
 import torch
 import pyro
 import pyro.distributions as dist

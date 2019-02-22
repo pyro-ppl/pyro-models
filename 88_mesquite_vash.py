@@ -1,4 +1,4 @@
-# model file: ../example-models/ARM/Ch.4/mesquite_vash.stan
+# model file: example-models/ARM/Ch.4/mesquite_vash.stan
 import torch
 import pyro
 import pyro.distributions as dist

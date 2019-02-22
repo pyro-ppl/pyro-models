@@ -1,4 +1,4 @@
-# model file: ../example-models/ARM/Ch.10/ideo_interactions.stan
+# model file: example-models/ARM/Ch.10/ideo_interactions.stan
 import torch
 import pyro
 import pyro.distributions as dist

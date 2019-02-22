@@ -1,4 +1,4 @@
-# model file: ../example-models/ARM/Ch.8/grades.stan
+# model file: example-models/ARM/Ch.8/grades.stan
 import torch
 import pyro
 import pyro.distributions as dist

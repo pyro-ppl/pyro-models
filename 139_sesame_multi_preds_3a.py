@@ -1,4 +1,4 @@
-# model file: ../example-models/ARM/Ch.10/sesame_multi_preds_3a.stan
+# model file: example-models/ARM/Ch.10/sesame_multi_preds_3a.stan
 import torch
 import pyro
 import pyro.distributions as dist

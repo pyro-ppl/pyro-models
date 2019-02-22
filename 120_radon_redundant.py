@@ -1,4 +1,4 @@
-# model file: ../example-models/ARM/Ch.19/radon_redundant.stan
+# model file: example-models/ARM/Ch.19/radon_redundant.stan
 import torch
 import pyro
 import pyro.distributions as dist

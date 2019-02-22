@@ -1,4 +1,4 @@
-# model file: ../example-models/ARM/Ch.5/wells_interaction.stan
+# model file: example-models/ARM/Ch.5/wells_interaction.stan
 import torch
 import pyro
 import pyro.distributions as dist

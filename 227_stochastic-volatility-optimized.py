@@ -1,4 +1,4 @@
-# model file: ../example-models/misc/moving-avg/stochastic-volatility-optimized.stan
+# model file: example-models/misc/moving-avg/stochastic-volatility-optimized.stan
 import torch
 import pyro
 import pyro.distributions as dist

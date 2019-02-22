@@ -1,4 +1,4 @@
-# model file: ../example-models/bugs_examples/vol1/pump/pump.stan
+# model file: example-models/bugs_examples/vol1/pump/pump.stan
 import torch
 import pyro
 import pyro.distributions as dist

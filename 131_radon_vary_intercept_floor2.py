@@ -1,4 +1,4 @@
-# model file: ../example-models/ARM/Ch.21/radon_vary_intercept_floor2.stan
+# model file: example-models/ARM/Ch.21/radon_vary_intercept_floor2.stan
 import torch
 import pyro
 import pyro.distributions as dist

@@ -1,4 +1,4 @@
-# model file: ../example-models/misc/irt/irt_multilevel.stan
+# model file: example-models/misc/irt/irt_multilevel.stan
 import torch
 import pyro
 import pyro.distributions as dist

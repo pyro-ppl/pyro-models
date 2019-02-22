@@ -1,4 +1,4 @@
-# model file: ../example-models/ARM/Ch.22/anova_radon_nopred.stan
+# model file: example-models/ARM/Ch.22/anova_radon_nopred.stan
 import torch
 import pyro
 import pyro.distributions as dist

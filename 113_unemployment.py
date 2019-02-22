@@ -1,4 +1,4 @@
-# model file: ../example-models/ARM/Ch.8/unemployment.stan
+# model file: example-models/ARM/Ch.8/unemployment.stan
 import torch
 import pyro
 import pyro.distributions as dist

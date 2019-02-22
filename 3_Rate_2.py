@@ -1,4 +1,4 @@
-# model file: ../example-models/Bayesian_Cognitive_Modeling/ParameterEstimation/Binomial/Rate_2.stan
+# model file: example-models/Bayesian_Cognitive_Modeling/ParameterEstimation/Binomial/Rate_2.stan
 import torch
 import pyro
 import pyro.distributions as dist

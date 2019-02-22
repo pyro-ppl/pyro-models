@@ -1,4 +1,4 @@
-# model file: ../example-models/ARM/Ch.18/weight.stan
+# model file: example-models/ARM/Ch.18/weight.stan
 import torch
 import pyro
 import pyro.distributions as dist

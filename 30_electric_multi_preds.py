@@ -1,4 +1,4 @@
-# model file: ../example-models/ARM/Ch.23/electric_multi_preds.stan
+# model file: example-models/ARM/Ch.23/electric_multi_preds.stan
 import torch
 import pyro
 import pyro.distributions as dist

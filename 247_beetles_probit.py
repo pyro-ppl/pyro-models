@@ -1,4 +1,4 @@
-# model file: ../example-models/bugs_examples/vol2/beetles/beetles_probit.stan
+# model file: example-models/bugs_examples/vol2/beetles/beetles_probit.stan
 import torch
 import pyro
 import pyro.distributions as dist

@@ -1,4 +1,4 @@
-# model file: ../example-models/ARM/Ch.14/pilots.stan
+# model file: example-models/ARM/Ch.14/pilots.stan
 import torch
 import pyro
 import pyro.distributions as dist
