@@ -1,0 +1,5 @@
+include *.rst
+include *.txt
+
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
