@@ -21,6 +21,17 @@ Constrained samples from improper distribution are sampled from a HalfCauchy:
 
 For inference to work, you may have to change the initializations of the model parameters.
 
+## Installation and Usage
+
+To install the package, clone the repository to a directory on your machine and run `python setup.py install` or `python setup.py develop` (depending on whether you want to edit the library).
+
+Subsequently, to load the models:
+```python
+import pyro_models
+models = pyro_models.load()
+```
+The variable `models` is a dictionary whose keys are the unique model index (prefixing the model filename), and whose value is a dictionary of model metadata, including the Pyro model function. See `examples/test_models.py` for a full demonstration of how to load a model and its dataset and learn the guide program by stochastic variational inference (SVI).
+
 ## Contributions
 Contributions welcome! Contributed examples need not follow the format of the current examples since they were automatically transpiled.  However, please do include the data (or a toy dataset your example runs on).
 
