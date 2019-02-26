@@ -50,7 +50,6 @@ def data(model):
 
     # convert dicts to torch tensors
     tensorize_data(data)
-    #print('tensorized data', data)
     model['data'] = data
 
     if 'transformed_data' in dir(foo):

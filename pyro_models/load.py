@@ -33,6 +33,4 @@ def load():
         else:
             raise Exception(f'Invalid file {f} in model zoo')
 
-    # TODO: Check that there is a data file for every model file
-
     return models
