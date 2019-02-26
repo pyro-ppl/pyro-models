@@ -1,7 +1,5 @@
-import json
 import argparse
-import importlib
-from six import string_types
+import sys
 
 import torch
 import pyro
@@ -10,75 +8,54 @@ from pyro.infer import SVI, Trace_ELBO
 from pyro.contrib.autoguide import AutoDelta, AutoDiagonalNormal
 import pyro.optim as optim
 
+import pyro_models
 
-def json_file_to_mem_format(fname):
-    with open(fname, "r") as f:
-        rdata = json.load(f)
-    data = {}
-    n = len(rdata[0])
-    for i in range(n):
-        key = rdata[0][i]
-        if key != "args":
-            data[key] = rdata[1][i]
-    return data
+def select_model(args, models):
+    if args.model_name is None and args.model_index is None:
+        raise Exception('One of model name or model index must be specified in command arguments!')
+    
+    if args.model_name is not None and args.model_index is not None:
+        raise Exception('Cannot specify both model name and index in command arguments!')
 
-
-def tensorize_data(data):
-    """
-    Convert python lists of data into pytorch tensors
-    in-place operation
-
-    :param data: Python dict of data with variable names as keys and values as values
-    :type data: dict
-    """
-    to_delete = []
-    for k in data:
-        if isinstance(data[k], float) or isinstance(data[k], int):
-            pass
-        elif isinstance(data[k], string_types):
-            to_delete.append(k)
-        elif isinstance(data[k], list):
-            for s in data[k]:
-                if isinstance(s, string_types):
-                    to_delete.append(k)
-                    break
-            else:
-                data[k] = torch.tensor(data[k]).float()
-        elif isinstance(data[k], torch.Tensor):
-            data[k] = torch.tensor(data[k]).float()
-        else:
-            raise ValueError("Invalid tensorization of data dict")
-    for k in to_delete:
-        del data[k]
-
+    if args.model_name is not None:
+        those_models = [m for idx, m in models.items() if m['model_name'] == args.model_name]
+        if those_models == []:
+            raise Exception(f'Model named {args.model_name} is not present in model zoo!')
+        elif len(those_models) > 1:
+            raise Exception(f'Model {args.model_name} is not uniquely named in model zoo!')
+        print(those_models)
+        model_dict = those_models[0]
+    else:
+        if args.model_index not in models:
+            raise Exception(f'Model index {args.model_index} is not present in model zoo!')
+        model_dict = models[args.model_index]
+    return model_dict
 
 def main(args):
+    # Init Pyro
     pyro.enable_validation(True)
     pyro.clear_param_store()
-    module = importlib.import_module(args.fname[:-3])
-    model_block = module.model
-    def model(data, params):
-        # we need to wrap init_params in the model because variables declared
-        # in Stan's "parameters" block are actually random variables
-        params = module.init_params(data)
-        model_block(data, params)
+
+    # Load meta-data for all models and select model based on command arguments
+    models = pyro_models.load()
+    model_dict = select_model(args, models)
+
+    # Define model/data/guide
+    model = model_dict['model']
+    data = pyro_models.data(model_dict)
     guide = AutoDelta(model)
+
+    # Perform variational inference
     svi = SVI(model, guide, optim.Adam({'lr': 0.1}), loss=Trace_ELBO())
-    data = json_file_to_mem_format(args.fname + '.json')
-    # convert dicts to torch tensors
-    tensorize_data(data)
-    if hasattr(module, 'transformed_data'):
-        # run transformed_data block if it exists
-        module.transformed_data(data)
     for i in range(args.num_epochs):
         params = {}
         loss = svi.step(data, params)
         print(loss)
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="parse args")
-    parser.add_argument('-n', '--num-epochs', default=10, type=int)
-    parser.add_argument('-f', '--fname', type=str, help="python file path")
+    parser.add_argument('-n', '--num-epochs', default=100, type=int)
+    parser.add_argument('-m', '--model-name', type=str, help="model name given by filename")
+    parser.add_argument('-i', '--model-index', type=int, help="index of model given by prefix")
     args = parser.parse_args()
     main(args)

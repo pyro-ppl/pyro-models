@@ -4,14 +4,15 @@ from setuptools import find_packages, setup
 from codecs import open
 from os import path
 
-# Get the long description from the README file
-with open(path.join(here, 'README.md'), encoding='utf-8') as f:
-    long_description = f.read()
+def readme():
+    with open('README.md') as f:
+        return f.read()
 
 setup(
     name='Pyro Models',
     version='0.0.0',
     description='Models written in Pyro Probabilistic Programming Language',
+    long_description=readme(),
     packages=find_packages(exclude=['contrib', 'docs', 'tests*', 'examples']),
     url='https://github.com/pyro-ppl/pyro-models',
     author='Uber AI Labs',
