@@ -1,15 +1,8 @@
 import json
-import argparse
-import importlib
+import os
 from six import string_types
 
 import torch
-import pyro
-import pyro.distributions as dist
-from pyro.infer import SVI, Trace_ELBO
-from pyro.contrib.autoguide import AutoDelta, AutoDiagonalNormal
-import pyro.optim as optim
-
 
 def json_file_to_mem_format(fname):
     with open(fname, "r") as f:
@@ -51,34 +44,16 @@ def tensorize_data(data):
     for k in to_delete:
         del data[k]
 
+def data(model):
+    data = json_file_to_mem_format(model['data_file'])
+    foo = model['module']
 
-def main(args):
-    pyro.enable_validation(True)
-    pyro.clear_param_store()
-    module = importlib.import_module(args.fname[:-3])
-    model_block = module.model
-    def model(data, params):
-        # we need to wrap init_params in the model because variables declared
-        # in Stan's "parameters" block are actually random variables
-        params = module.init_params(data)
-        model_block(data, params)
-    guide = AutoDelta(model)
-    svi = SVI(model, guide, optim.Adam({'lr': 0.1}), loss=Trace_ELBO())
-    data = json_file_to_mem_format(args.fname + '.json')
     # convert dicts to torch tensors
     tensorize_data(data)
-    if hasattr(module, 'transformed_data'):
+    model['data'] = data
+
+    if 'transformed_data' in dir(foo):
         # run transformed_data block if it exists
-        module.transformed_data(data)
-    for i in range(args.num_epochs):
-        params = {}
-        loss = svi.step(data, params)
-        print(loss)
+        foo.transformed_data(data)
 
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="parse args")
-    parser.add_argument('-n', '--num-epochs', default=10, type=int)
-    parser.add_argument('-f', '--fname', type=str, help="python file path")
-    args = parser.parse_args()
-    main(args)
+    return data

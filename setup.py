@@ -1,12 +1,19 @@
 from __future__ import absolute_import, division, print_function
 
 from setuptools import find_packages, setup
+from codecs import open
+from os import path
+
+def readme():
+    with open('README.md') as f:
+        return f.read()
 
 setup(
     name='Pyro Models',
     version='0.0.0',
     description='Models written in Pyro Probabilistic Programming Language',
-    packages=find_packages(include=['pyro']),
+    long_description=readme(),
+    packages=find_packages(exclude=['contrib', 'docs', 'tests*', 'examples']),
     url='https://github.com/pyro-ppl/pyro-models',
     author='Uber AI Labs',
     author_email='jpchen@uber.com',
