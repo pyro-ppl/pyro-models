@@ -30,13 +30,9 @@ Subsequently, to load the models:
 import pyro_models
 models = pyro_models.load()
 ```
-<<<<<<< HEAD
-The variable `models` is a dictionary whose keys are the unique model index (prefixing the model filename), and whose value is a dictionary of model metadata, including the Pyro model function. See `examples/test_models.py` for a full demonstration of how to load a model and its dataset and learn the guide program by stochastic variational inference (SVI).
-=======
 The variable `models` is a dictionary whose keys are the unique model name qualified by the collection that it is from, and whose value is a dictionary of model metadata, including the Pyro model function. For instance, the model `beetles` from the BUGS model collection is in `models['bugs.beetles']`.
 
 See `examples/test_models.py` for a full demonstration of how to load a model and its dataset and learn the guide program by stochastic variational inference (SVI).
->>>>>>> b291c7360fcb360a34c52a02c35e6dd397d36c29
 
 ## Contributions
 Contributions welcome! Contributed examples need not follow the format of the current examples since they were automatically transpiled.  However, please do include the data (or a toy dataset your example runs on).
