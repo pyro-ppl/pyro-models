@@ -49,8 +49,8 @@ def model(data, params):
     with pyro.plate('person', J):
         eta1 =  pyro.sample("eta1", dist.Normal(0., 1.))
         eta2 =  pyro.sample("eta2", dist.Normal(0., 1.))
-        a1 = 10 * mu_a1 + sigma_a1 * eta1;
-        a2 = 0.1 * mu_a2 + sigma_a2 * eta2;
+        a1 = 10 * mu_a1 + sigma_a1 * eta1
+        a2 = 0.1 * mu_a2 + sigma_a2 * eta2
     with pyro.plate('data', N, dim=-1):
         y_hat = a1[person] + a2[person] * time + beta * time * treatment
         y =  pyro.sample("y", dist.Normal(y_hat, sigma_y), obs=y)
