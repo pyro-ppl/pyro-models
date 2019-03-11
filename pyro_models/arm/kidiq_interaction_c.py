@@ -25,9 +25,9 @@ def transformed_data(data):
     kid_score = data["kid_score"]
     mom_hs = data["mom_hs"]
     mom_iq = data["mom_iq"]
-    c_mom_hs = mom_hs - torch.mean(mom_hs);
-    c_mom_iq = mom_iq - torch.mean(mom_iq);
-    inter    = c_mom_hs * c_mom_iq;
+    c_mom_hs = mom_hs - torch.mean(mom_hs)
+    c_mom_iq = mom_iq - torch.mean(mom_iq)
+    inter    = c_mom_hs * c_mom_iq
     data["c_mom_hs"] = c_mom_hs
     data["c_mom_iq"] = c_mom_iq
     data["inter"] = inter
@@ -51,6 +51,6 @@ def model(data, params):
     # init parameters
     beta = params["beta"]
     # initialize transformed parameters
+    sigma =  pyro.sample("sigma", dist.HalfCauchy(torch.tensor(2.5)))
     with pyro.plate("data", N):
-        sigma =  pyro.sample("sigma", dist.HalfCauchy(torch.tensor(2.5)))
         kid_score = pyro.sample('obs', dist.Normal(beta[0] + beta[1] * c_mom_hs + beta[2] * c_mom_iq + beta[3] * inter, sigma), obs=kid_score)

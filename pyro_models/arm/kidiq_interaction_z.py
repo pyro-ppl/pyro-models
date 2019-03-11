@@ -52,6 +52,6 @@ def model(data, params):
     # init parameters
     beta = params["beta"]
 
-    with pyro.plate("data", N):
-        sigma =  pyro.sample("sigma", dist.HalfCauchy(torch.tensor(2.5)))
+    sigma =  pyro.sample("sigma", dist.HalfCauchy(torch.tensor(2.5)))
+    with pyro.plate("data", N):    
         kid_score = pyro.sample('obs', dist.Normal(beta[0] + beta[1] * z_mom_hs + beta[2] * z_mom_iq + beta[3] * inter, sigma), obs=kid_score)

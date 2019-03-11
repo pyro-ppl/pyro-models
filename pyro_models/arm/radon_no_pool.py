@@ -33,9 +33,9 @@ def model(data, params):
     y = data["y"]
 
     # model block
-    with pyro.plate("J", J):
-        mu_a =  pyro.sample("mu_a", dist.Normal(0., 1.))
-        sigma_a =  pyro.sample("sigma_a", dist.HalfCauchy(2.5))
+    mu_a =  pyro.sample("mu_a", dist.Normal(0., 1.))
+    sigma_a =  pyro.sample("sigma_a", dist.HalfCauchy(2.5))
+    with pyro.plate("J", J):    
         a = pyro.sample("a", dist.Normal(mu_a, sigma_a))
     beta =  pyro.sample("beta", dist.Normal(0., 1.))
     sigma_y =  pyro.sample("sigma_y", dist.HalfCauchy(2.5))

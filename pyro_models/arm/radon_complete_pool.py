@@ -35,7 +35,7 @@ def model(data, params):
     # initialize transformed parameters
     # model block
 
-    sigma =  pyro.sample("sigma", dist.Cauchy(0., 2.5))
+    sigma =  pyro.sample("sigma", dist.HalfCauchy(0., 2.5))
     with pyro.plate("data", N):
         y = pyro.sample('y', dist.Normal(beta[0] + beta[1] * x, sigma), obs=y)
 

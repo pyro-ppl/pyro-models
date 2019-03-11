@@ -25,9 +25,9 @@ def transformed_data(data):
     earn = data["earn"]
     height = data["height"]
     male = data["male"]
-    log_earn = torch.log(earn);
-    z_height = (height - torch.mean(height)) / torch.std(height);
-    inter    = z_height * male;
+    log_earn = torch.log(earn)
+    z_height = (height - torch.mean(height)) / torch.std(height)
+    inter    = z_height * male
     data["log_earn"] = log_earn
     data["z_height"] = z_height
     data["inter"] = inter
@@ -49,6 +49,6 @@ def model(data, params):
     inter = data["inter"]
 
     beta = params["beta"]
+    sigma =  pyro.sample("sigma", dist.HalfCauchy(torch.tensor(2.5)))
     with pyro.plate("data", N):
-        sigma =  pyro.sample("sigma", dist.HalfCauchy(torch.tensor(2.5)))
         log_earn = pyro.sample('obs', dist.Normal(beta[0] + beta[1] * z_height + beta[2] * male + beta[3] * inter, sigma), obs=log_earn)

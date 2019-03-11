@@ -24,9 +24,9 @@ def model(data, params):
     y = data["y"]
 
     # model block
-    mu =  pyro.sample("mu",  dist.Cauchy(0., 2.5))
-    theta =  pyro.sample("theta",  dist.Cauchy(0., 2.5).expand([2]))
-    sigma =  pyro.sample("sigma",  dist.Cauchy(0., 2.5)).abs()
+    mu =  pyro.sample("mu",  dist.HalfCauchy(0., 2.5))
+    theta =  pyro.sample("theta",  dist.HalfCauchy(0., 2.5).expand([2]))
+    sigma =  pyro.sample("sigma",  dist.HalfCauchy(0., 2.5)).abs()
     with torch.no_grad():
         epsilon = init_vector("epsilon", dims=T)
         epsilon[0] = y[0] - mu

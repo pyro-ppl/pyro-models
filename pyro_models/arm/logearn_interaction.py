@@ -49,6 +49,6 @@ def model(data, params):
 
     # init parameters
     beta = params["beta"]
+    sigma =  pyro.sample("sigma", dist.HalfCauchy(torch.tensor(2.5)))
     with pyro.plate("data", N):
-        sigma =  pyro.sample("sigma", dist.HalfCauchy(torch.tensor(2.5)))
         log_earn = pyro.sample('obs', dist.Normal(beta[0] + beta[1] * height + beta[2] * male + beta[3] * inter, sigma), obs=log_earn)

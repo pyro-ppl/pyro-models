@@ -55,7 +55,7 @@ def model(data, params):
     mu_a = pyro.sample("mu_a", dist.Uniform(-1., 1.))
     mu_b = pyro.sample("mu_b", dist.Uniform(-1., 1.))
     with pyro.plate("data", N):
-        a = 0.1 * mu_a + eta_a * sigma_a;
-        b = 0.1 * mu_b + eta_b * sigma_b;
+        a = 0.1 * mu_a + eta_a * sigma_a
+        b = 0.1 * mu_b + eta_b * sigma_b
         y_hat = a[group_id] + b[scenario_id]
         y =  pyro.sample("y", dist.Normal(y_hat, sigma_y), obs=y)
