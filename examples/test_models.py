@@ -27,11 +27,12 @@ def main(args):
     # Load meta-data for all models and select model based on command arguments
     models = pyro_models.load()
     model_dict = select_model(args, models)
+    #model_dict = models['arm.roaches_overdispersion']
 
     # Define model/data/guide
     model = model_dict['model']
     data = pyro_models.data(model_dict)
-    guide = AutoDelta(model)
+    guide = AutoDiagonalNormal(model)
 
     # Perform variational inference
     svi = SVI(model, guide, optim.Adam({'lr': 0.1}), loss=Trace_ELBO())
