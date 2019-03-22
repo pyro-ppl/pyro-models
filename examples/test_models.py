@@ -27,7 +27,11 @@ def main(args):
     # Load meta-data for all models and select model based on command arguments
     models = pyro_models.load()
     model_dict = select_model(args, models)
+    #model_dict = models['arm.radon_inter_vary']
+    #model_dict = models['arm.radon_group']
+    #model_dict = models['arm.wells_dist']
     #model_dict = models['arm.earnings_latin_square_chr']
+    #model_dict = models['arm.anova_radon_nopred']
 
     # Define model/data/guide
     model = model_dict['model']
