@@ -56,9 +56,9 @@ def model(data, params):
     with pyro.plate("data", N):
         # NOTE: the zeros_like is here since tau might be in plate
         lambdah = pyro.sample('lambda', dist.Normal(loc=torch.zeros_like(sigma), scale=sigma))
-
         log_rate = lambdah + log_expo + beta[...,0] + beta[...,1]*roach1 + beta[...,2]*senior + beta[...,3]*treatment
-        print(log_rate)
-        print(log_rate.exp(), y.size())
-        sys.exit()
-        pyro.sample('y', dist.Poisson(rate=log_rate.exp()), obs=y)
+
+        #print('log_rate', log_rate.min().item(), log_rate.mean().item(), log_rate.max().item())
+
+        # NOTE: Do we have to worry about under-/overflow here due to exp?
+        pyro.sample('y', dist.Poisson(rate=log_rate.exp()+1e-8), obs=y)
