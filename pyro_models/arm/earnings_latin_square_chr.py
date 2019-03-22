@@ -87,7 +87,9 @@ def model(data, params):
     d = 0.01 * mu_d + sigma_d * eta_d
 
     with pyro.plate("data", N):
-        y_hat = a1[eth].squeeze(1) + a2[eth].squeeze(1) * x_centered + b1[age] + b2[age] * \
-                x_centered + c[eth, age] + d[eth, age] * x_centered
+        # TODO: Check broadcasting!
+        # How should [eth,age] join indexing work?
+        y_hat = a1[...,eth].squeeze(1) + a2[...,eth].squeeze(1) * x_centered + b1[...,age] + b2[...,age] * \
+                x_centered + c[..., eth, age] + d[..., eth, age] * x_centered
 
         pyro.sample('y', dist.Normal(y_hat, sigma_y), obs=y)

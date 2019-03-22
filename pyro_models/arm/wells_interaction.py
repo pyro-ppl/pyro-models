@@ -25,8 +25,8 @@ def transformed_data(data):
     switched = data["switched"]
     dist = data["dist"]
     arsenic = data["arsenic"]
-    dist100 = dist / 100.0;
-    inter   = dist100 * arsenic;
+    dist100 = dist / 100.0
+    inter   = dist100 * arsenic
     data["dist100"] = dist100
     data["inter"] = inter
 

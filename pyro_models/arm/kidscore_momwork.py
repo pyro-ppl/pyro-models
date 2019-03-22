@@ -22,9 +22,9 @@ def transformed_data(data):
     N = data["N"]
     kid_score = data["kid_score"]
     mom_work = data["mom_work"]
-    work2 = mom_work == 2;
-    work3 = mom_work == 3;
-    work4 = mom_work == 4;
+    work2 = mom_work == 2
+    work3 = mom_work == 3
+    work4 = mom_work == 4
     data["work2"] = work2
     data["work3"] = work3
     data["work4"] = work4
@@ -46,6 +46,6 @@ def model(data, params):
 
     # init parameters
     beta = params["beta"]
+    sigma =  pyro.sample("sigma", dist.HalfCauchy(torch.tensor(2.5)))
     with pyro.plate("data", N):
-        sigma =  pyro.sample("sigma", dist.HalfCauchy(torch.tensor(2.5)))
         kid_score = pyro.sample('obs', dist.Normal(beta[0] + beta[1] * work2 + beta[2] * work3 + beta[3] * work4, sigma), obs=kid_score)

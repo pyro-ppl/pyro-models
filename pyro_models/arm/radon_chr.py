@@ -38,9 +38,9 @@ def model(data, params):
     sigma_eta = params["sigma_eta"]
     sigma_y = params["sigma_y"]
 
+    mu_eta =  pyro.sample("mu_eta", dist.Normal(0., 1))
     with pyro.plate("J", J):
         et =  pyro.sample("et", dist.Normal(0., 1.))
-        mu_eta =  pyro.sample("mu_eta", dist.Normal(0., 1))
         eta = 0.1 * mu_eta + sigma_eta * et
     with pyro.plate("data", N):
         y_hat = eta[county]

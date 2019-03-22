@@ -50,8 +50,8 @@ def model(data, params):
         eta_a =  pyro.sample("eta_a", dist.Normal(0., 1.))
     with pyro.plate("n_scenarios", n_scenarios):
         eta_b =  pyro.sample("eta_b", dist.Normal(0., 1.))
-    a = 10 * mu_a + eta_a * sigma_a;
-    b = 10 * mu_b + eta_b * sigma_b;
+    a = 10 * mu_a + eta_a * sigma_a
+    b = 10 * mu_b + eta_b * sigma_b
     with pyro.plate("data", N):
         y_hat = a[group_id] + b[scenario_id]
         y =  pyro.sample("y", dist.Normal(y_hat, sigma_y), obs=y)

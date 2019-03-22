@@ -40,9 +40,9 @@ def transformed_data(data):
     log_weight = torch.log(weight)
     log_diam1 = torch.log(diam1)
     log_diam2 = torch.log(diam2)
-    log_canopy_height = torch.log(canopy_height);
-    log_total_height  = torch.log(total_height);
-    log_density       = torch.log(density);
+    log_canopy_height = torch.log(canopy_height)
+    log_total_height  = torch.log(total_height)
+    log_density       = torch.log(density)
     data["log_weight"] = log_weight
     data["log_diam1"] = log_diam1
     data["log_diam2"] = log_diam2

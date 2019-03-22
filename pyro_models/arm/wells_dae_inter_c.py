@@ -29,12 +29,12 @@ def transformed_data(data):
     dist = data["dist"]
     arsenic = data["arsenic"]
     educ = data["educ"]
-    c_dist100 = (dist - mean(dist)) / 100.0;
-    c_arsenic = arsenic - mean(arsenic);
-    c_educ4   = (educ - mean(educ)) / 4.0;
-    da_inter  = c_dist100 * c_arsenic;
-    de_inter  = c_dist100 * c_educ4;
-    ae_inter  = c_arsenic * c_educ4;
+    c_dist100 = (dist - mean(dist)) / 100.0
+    c_arsenic = arsenic - mean(arsenic)
+    c_educ4   = (educ - mean(educ)) / 4.0
+    da_inter  = c_dist100 * c_arsenic
+    de_inter  = c_dist100 * c_educ4
+    ae_inter  = c_arsenic * c_educ4
     data["c_dist100"] = c_dist100
     data["c_arsenic"] = c_arsenic
     data["c_educ4"] = c_educ4
@@ -69,7 +69,7 @@ def model(data, params):
     # model block
 
     with pyro.plate("data", N):
-        switched = pyro.sample('switched', dist.Bernoulli(logits=beta[0] + beta[1] * c_dist100 + \
-                        beta[2] * c_arsenic + beta[3] * c_educ4 + beta[4] * da_inter + beta[5] * \
-                        de_inter + beta[6] * ae_inter), obs=switched)
+        switched = pyro.sample('switched', dist.Bernoulli(logits=beta[...,0] + beta[...,1] * c_dist100 + \
+                        beta[...,2] * c_arsenic + beta[...,3] * c_educ4 + beta[...,4] * da_inter + beta[...,5] * \
+                        de_inter + beta[...,6] * ae_inter), obs=switched)
 
