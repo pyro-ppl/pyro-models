@@ -5,7 +5,7 @@ import torch
 import pyro
 import pyro.distributions as dist
 from pyro.infer import SVI, Trace_ELBO, RenyiELBO
-from pyro.contrib.autoguide import AutoDelta, AutoDiagonalNormal
+from pyro.contrib.autoguide import AutoDelta, AutoDiagonalNormal, AutoMultivariateNormal
 import pyro.optim as optim
 
 import pyro_models
@@ -27,12 +27,13 @@ def main(args):
     # Load meta-data for all models and select model based on command arguments
     models = pyro_models.load()
     model_dict = select_model(args, models)
-    #model_dict = models['arm.election88_ch19']
+    #model_dict = models['arm.earnings_latin_square_chr']
 
     # Define model/data/guide
     model = model_dict['model']
     data = pyro_models.data(model_dict)
-    guide = AutoDiagonalNormal(model)
+    #guide = AutoDiagonalNormal(model)
+    guide = AutoMultivariateNormal(model)
     #guide = AutoDelta(model)
 
     # Perform variational inference

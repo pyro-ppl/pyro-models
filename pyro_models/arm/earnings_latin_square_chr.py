@@ -87,9 +87,13 @@ def model(data, params):
     d = 0.01 * mu_d + sigma_d * eta_d
 
     with pyro.plate("data", N):
-        # TODO: Check broadcasting!
-        # How should [eth,age] join indexing work?
-        y_hat = a1[...,eth].squeeze(1) + a2[...,eth].squeeze(1) * x_centered + b1[...,age] + b2[...,age] * \
+        #print('a1[...,eth,0]', a1[...,eth,0].size(), 'a2[...,eth,0]', a2[...,eth,0].size(), 'x_centered', x_centered.size())
+        #print('b1[...,age]', b1[...,age].size(), 'b2[...,age]', b2[...,age].size(), 'c[..., eth, age]', c[..., eth, age].size(), 'd[..., eth, age]', d[..., eth, age].size() )
+        y_hat = a1[...,eth,:].squeeze(-1) + a2[...,eth,:].squeeze(-1) * x_centered + b1[...,age].squeeze() + b2[...,age].squeeze() * \
                 x_centered + c[..., eth, age] + d[..., eth, age] * x_centered
 
-        pyro.sample('y', dist.Normal(y_hat, sigma_y), obs=y)
+        # A hack to make dimensions broadcast correctly when there is an IW plate
+        if len(a1.size()) > 2:
+            y_hat = y_hat.unsqueeze(-2)
+
+        y_sample = pyro.sample('y', dist.Normal(y_hat, sigma_y), obs=y)
