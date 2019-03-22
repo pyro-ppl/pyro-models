@@ -34,5 +34,5 @@ def model(data, params):
     # initialize transformed parameters
     # model block
     with pyro.plate("data", N):
-        switc= pyro.sample('switc', dist.Bernoulli(logits=beta[0] + beta[1] * dist_), obs=switc)
+        switc= pyro.sample('switc', dist.Bernoulli(logits=beta[...,0] + beta[...,1] * dist_), obs=switc)
 

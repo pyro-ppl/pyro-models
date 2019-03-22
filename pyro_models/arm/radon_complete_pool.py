@@ -37,4 +37,4 @@ def model(data, params):
 
     sigma =  pyro.sample("sigma", dist.HalfCauchy(2.5))
     with pyro.plate("data", N):
-        y = pyro.sample('y', dist.Normal(beta[0] + beta[1] * x, sigma), obs=y)
+        y = pyro.sample('y', dist.Normal(beta[...,0] + beta[...,1] * x, sigma), obs=y)
