@@ -1,4 +1,4 @@
-# model file: example-models/ARM/Ch.19/election88.stan
+# model file: example-models/ARM/Ch.17/17.7_latent_glm.stan
 import torch
 import pyro
 import pyro.distributions as dist
@@ -92,13 +92,13 @@ def model(data, params):
     with age_plate, edu_plate:
         b_age_edu =  pyro.sample("b_age_edu", dist.Normal(0., sigma_age_edu))
 
+    b_state_hat = b_region[..., region] + b_v_prev * v_prev
     with pyro.plate('state', n_state):
-        b_state_hat = b_region[region] + b_v_prev * v_prev
         b_state =  pyro.sample("b_state", dist.Normal(b_state_hat, sigma_state))
 
     with pyro.plate('data', N):
         Xbeta = b_0 + b_female * female + b_black * black + b_female_black * female * black + \
-                b_age[age].squeeze(-1) + b_edu[edu] + b_age_edu[age, edu] + b_state[state]
+                b_age.squeeze(-1)[..., age] + b_edu[..., edu] + b_age_edu[..., age, edu] + b_state[..., state]
         p = inv_logit(Xbeta).clamp(min=0., max=1.0)
         y =  pyro.sample("y", dist.Bernoulli(p), obs=y)
 #         z_lo = 100 * (y == 0)
