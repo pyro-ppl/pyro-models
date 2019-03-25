@@ -46,6 +46,6 @@ def model(data, params):
     with pyro.plate("2", 2):
         beta =  pyro.sample("beta", dist.Normal(mu_beta, sigma_beta))
     with pyro.plate("data", N):
-        y_hat = alpha[...,county] + x * beta[...,0] + u * beta[...,1]
+        y_hat = alpha[...,county] + x * beta[...,0].unsqueeze(-1) + u * beta[...,1].unsqueeze(-1)
         y = pyro.sample('y', dist.Normal(y_hat, sigma), obs=y)
 
