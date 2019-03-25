@@ -40,7 +40,5 @@ def model(data, params):
         b = pyro.sample("b", dist.Normal(0., 100.))
 
     with pyro.plate('data', N):
-        #print('b', b.size(), 'black', black.size(), 'female', female.size(), 'a', a.size())
-        #print('b[...,0].unsqueeze(-1)', b[...,0].unsqueeze(-1).size(), 'a[...,state]', a[...,state].size() )
         y_hat = b[...,0].unsqueeze(-1)*black + b[...,1].unsqueeze(-1)*female + a[...,state]
         y =  pyro.sample("y", dist.Bernoulli(logits=y_hat), obs=y)

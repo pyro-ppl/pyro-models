@@ -34,8 +34,5 @@ def model(data, params):
     # initialize transformed parameters
     # model block
     with pyro.plate("data", N):
-        #log_p = beta[...,0].unsqueeze(-1) + beta[...,1].unsqueeze(-1) * dist_
         log_p = beta[...,0] + beta[...,1] * dist_
-        #print('beta[...,0]', beta[...,0].size(), 'log_p', log_p.size())
         switched_sample = pyro.sample('switched', dist.Bernoulli(logits=log_p), obs=switched)
-        #print('switched_sample', switched_sample.size())
