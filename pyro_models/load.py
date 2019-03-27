@@ -3,6 +3,7 @@ import os
 import importlib
 import imp
 from functools import partial
+import warnings
 
 def load():
     base_dir = pyro_models.__path__[0]
@@ -33,7 +34,7 @@ def load():
               model['source_file'] = os.path.join(model_dir, f)
               model['name'] = name.lower()
               foo = imp.load_source('model.'+f[:-3].lower(), os.path.join(model_dir, f))
-              model['module'] = foo 
+              model['module'] = foo
 
               # NOTE: Need to use partial to make sure correct foo is bound to function!
               model['model'] = partial(model_wrapped, foo)
@@ -41,6 +42,6 @@ def load():
           elif f.endswith('.py.json'):
               model['data_file'] = os.path.join(model_dir, f)
           else:
-              raise Exception(f'Invalid file {f} in model zoo')
+              warnings.warn(f'Invalid file {f} in model zoo. Skipping...')
 
     return models
