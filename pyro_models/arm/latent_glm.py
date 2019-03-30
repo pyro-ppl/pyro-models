@@ -42,6 +42,8 @@ def validate_data_def(data):
     state = data["state"]
     v_prev = data["v_prev"]
     y = data["y"]
+    # XXX: missing data!
+    # z = data["z"]
 
 def init_params(data):
     params = {}
@@ -97,10 +99,18 @@ def model(data, params):
         b_state =  pyro.sample("b_state", dist.Normal(b_state_hat, sigma_state))
 
     with pyro.plate('data', N):
-        Xbeta = b_0 + b_female * female + b_black * black + b_female_black * female * black + \
-                b_age.squeeze(-1)[..., age] + b_edu[..., edu] + b_age_edu[..., age, edu] + b_state[..., state]
+        # this should be size (num_particles, N) or (N) if num_particles=1
+        Xbeta = (b_0 + b_female * female + b_black * black + b_female_black * \
+                 female * black).squeeze() + b_age.squeeze()[..., age] + \
+                b_edu[..., edu].squeeze() + b_age_edu[..., age, edu].squeeze() + \
+                b_state[..., state].squeeze()
         p = inv_logit(Xbeta).clamp(min=0., max=1.0)
+        if len(b_age.shape) > 2:
+            # hack to get IWAE plate dims to work out correctly
+            p = p.unsqueeze(-2)
         y =  pyro.sample("y", dist.Bernoulli(p), obs=y)
+
+        # XXX: missing data!
 #         z_lo = 100 * (y == 0)
 #         z_hi = 100 * (y == 1)
           # truncated distribution
