@@ -95,5 +95,6 @@ def model(data, params):
         # A hack to make dimensions broadcast correctly when there is an IW plate
         if len(a1.size()) > 2:
             y_hat = y_hat.unsqueeze(-2)
+            #sigma_y = sigma_y.squeeze(-2)
 
         y_sample = pyro.sample('y', dist.Normal(y_hat, sigma_y), obs=y)
