@@ -44,30 +44,6 @@ def main(args):
     #guide = AutoAutoregressiveNormal(model)
     guide = AutoIAFNormal(model)
 
-    print(guide(data, {}))
-    sys.exit()
-
-    """hidden_dim = 16
-    latent_dim = 2
-    arn = pyro.nn.AutoRegressiveNN(latent_dim, [latent_dim*3+1], param_dims=[hidden_dim]*3)
-    flow = dist.DeepSigmoidalFlow(arn)
-
-    def guide(data, params):
-        N = data["N"]
-        switched = data["switched"]
-        dist_ = data["dist"]
-
-        pyro.module("naf", flow)
-        flow_dist = dist.TransformedDistribution(dist.Normal(0., 1.).expand([latent_dim]), [flow])
-
-        return pyro.sample("beta", flow_dist)
-
-    flow_dist = dist.TransformedDistribution(dist.Normal(0., 1.).expand([latent_dim]), [flow])
-    z = flow_dist.sample()
-    print(flow._cache_size)
-    print(z, flow_dist.log_prob(z))
-    sys.exit()"""
-
     # Perform variational inference
     svi = SVI(model, guide, optim.Adam({'lr': 0.0001}), loss=Trace_ELBO(vectorize_particles=True, num_particles=100))
     iwae = RenyiELBO(vectorize_particles=True, num_particles=5000)
@@ -81,7 +57,7 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="parse args")
-    parser.add_argument('-n', '--num-epochs', default=1000, type=int, help="number of epochs to run learning for")
+    parser.add_argument('-n', '--num-epochs', default=100, type=int, help="number of epochs to run learning for")
     parser.add_argument('-m', '--model-name', type=str, help="model name qualified by dataset")
     args = parser.parse_args()
     main(args)
