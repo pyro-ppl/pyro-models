@@ -6,8 +6,6 @@ import pyro.distributions as dist
 def init_vector(name, dims=None):
     return pyro.sample(name, dist.Normal(torch.zeros(dims), 0.2 * torch.ones(dims)).to_event(1))
 
-
-
 def validate_data_def(data):
     assert 'N' in data, 'variable not found in data: key=N'
     assert 'n_age' in data, 'variable not found in data: key=n_age'
@@ -86,6 +84,11 @@ def model(data, params):
         d = pyro.sample('d', dist.Normal(0.1 * mu_d, sigma_d))
 
     with pyro.plate("data", N):
-        y_hat = a1[eth].squeeze(1) + a2[eth].squeeze(1) * x + b1[age] + b2[age] * x +\
-                c[eth, age] + d[eth, age] * x
+        y_hat = a1[..., eth, :].squeeze(-1) + a2[..., eth, :].squeeze(-1) * x + b1[..., age].squeeze() + b2[..., age].squeeze() * \
+                x + c[..., eth, age] + d[..., eth, age] * x
+
+        # A hack to make dimensions broadcast correctly when there is an IW plate
+        if len(a1.size()) > 2:
+            y_hat = y_hat.unsqueeze(-2)
+
         pyro.sample('y', dist.Normal(y_hat, sigma_y), obs=y)
