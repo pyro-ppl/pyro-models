@@ -86,10 +86,9 @@ def model(data, params):
         b_region =  pyro.sample("b_region", dist.Normal((100 * mu_region), sigma_region).expand([n_region]))
     b_v_prev =  pyro.sample("b_v_prev", dist.Normal(0., 1.))
     with pyro.plate('state', n_state):
-        b_state_hat = b_region[region] + 100 * b_v_prev * v_prev
+        b_state_hat = b_region[...,region] + 100 * b_v_prev * v_prev
         b_state =  pyro.sample("b_state", dist.Normal(b_state_hat, sigma_state))
     with pyro.plate('data', N):
-        Xbeta = beta[0] + beta[1]*female + beta[2] * black + beta[3] * female * black + \
-                b_age[age] + b_edu[edu] + b_age_edu[age_edu] + b_state[state]
+        Xbeta = beta[...,0] + beta[...,1]*female + beta[...,2] * black + beta[...,3] * female * black + \
+                b_age[...,age] + b_edu[...,edu] + b_age_edu[...,age_edu] + b_state[...,state]
         y =  pyro.sample("y", dist.Bernoulli(logits=Xbeta), obs=y)
-
