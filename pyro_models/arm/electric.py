@@ -42,7 +42,6 @@ def model(data, params):
         a =  pyro.sample("a", dist.Normal((100 * mu_a), sigma_a))
     beta =  pyro.sample("beta", dist.Normal(0., 1))
     with pyro.plate("data", N):
-        # TODO: Need to unsqueeze second term?
         y_hat = a[...,pair] + beta * treatment
         y =  pyro.sample("y", dist.Normal(y_hat, sigma_y), obs=y)
 
