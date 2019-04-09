@@ -45,6 +45,8 @@ def tensorize_data(data):
         del data[k]
 
 def data(model):
+    print(model)
+    print(model.keys())
     data = json_file_to_mem_format(model['data_file'])
     foo = model['module']
 
