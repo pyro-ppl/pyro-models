@@ -40,8 +40,11 @@ def load():
               model['model'] = partial(model_wrapped, foo)
 
           elif f.endswith('.py.json'):
+              print('LOADING datafile: ' + f)
               model['data_file'] = os.path.join(model_dir, f)
           else:
               warnings.warn(f'Invalid file {f} in model zoo. Skipping...')
-
+    print('loading models')
+    print(models)
+    print('-----')
     return models
