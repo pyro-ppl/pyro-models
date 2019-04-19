@@ -55,6 +55,6 @@ def model(data, params):
         a1 =  pyro.sample("a1", dist.Normal(mu_a1, sigma_a1))
         a2 =  pyro.sample("a2", dist.Normal((0.1 * mu_a2), sigma_a2))
     with pyro.plate('data', N, dim=-1):
-        y_hat = a1[person] + a2[person] * time
+        y_hat = a1[...,person] + a2[...,person] * time
         y =  pyro.sample("y", dist.Normal(y_hat, sigma_y), obs=y)
 
