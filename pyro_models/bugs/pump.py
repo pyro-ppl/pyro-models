@@ -1,3 +1,6 @@
+# Copyright Contributors to the Pyro project.
+# SPDX-License-Identifier: Apache-2.0
+
 # model file: example-models/bugs_examples/vol1/pump/pump.stan
 import torch
 import pyro

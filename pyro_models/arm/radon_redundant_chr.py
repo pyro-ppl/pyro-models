@@ -1,3 +1,6 @@
+# Copyright Contributors to the Pyro project.
+# SPDX-License-Identifier: Apache-2.0
+
 # model file: example-models/ARM/Ch.19/radon_redundant_chr.stan
 import torch
 import pyro

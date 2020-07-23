@@ -1,3 +1,6 @@
+# Copyright Contributors to the Pyro project.
+# SPDX-License-Identifier: Apache-2.0
+
 # model file: example-models/bugs_examples/vol2/beetles/beetles_probit.stan
 import torch
 import pyro
