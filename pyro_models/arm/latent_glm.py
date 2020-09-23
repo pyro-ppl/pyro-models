@@ -1,3 +1,6 @@
+# Copyright Contributors to the Pyro project.
+# SPDX-License-Identifier: Apache-2.0
+
 # model file: example-models/ARM/Ch.17/17.7_latent_glm.stan
 import torch
 import pyro

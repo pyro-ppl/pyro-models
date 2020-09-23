@@ -1,3 +1,6 @@
+# Copyright Contributors to the Pyro project.
+# SPDX-License-Identifier: Apache-2.0
+
 # model file: example-models/misc/moving-avg/stochastic-volatility-optimized.stan
 import torch
 import pyro

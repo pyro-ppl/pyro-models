@@ -1,3 +1,6 @@
+# Copyright Contributors to the Pyro project.
+# SPDX-License-Identifier: Apache-2.0
+
 # model file: example-models/ARM/Ch.5/wells_dae_inter.stan
 import torch
 import pyro

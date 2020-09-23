@@ -1,3 +1,6 @@
+# Copyright Contributors to the Pyro project.
+# SPDX-License-Identifier: Apache-2.0
+
 # model file: example-models/Bayesian_Cognitive_Modeling/GettingStarted/Rate_1.stan
 import torch
 import pyro
